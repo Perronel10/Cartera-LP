@@ -4,7 +4,6 @@ service cloud.firestore {
     // Cuentas habilitadas para la cartera compartida.
     function autorizado() {
       return request.auth != null
-        && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'password')
         && request.auth.token.email.lower() in ['leandro@estudiojuridicoperrone.com', 'administracion@estudiojuridicoperrone.com'];
     }
     function esLeandro() {
