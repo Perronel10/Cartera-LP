@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Cuentas habilitadas para la cartera compartida.
+    function autorizado() {
+      return request.auth != null
+        && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'password')
+        && request.auth.token.email.lower() in ['leandro@estudiojuridicoperrone.com', 'administracion@estudiojuridicoperrone.com'];
+    }
+    function esLeandro() {
+      return autorizado() && request.auth.token.email.lower() == 'leandro@estudiojuridicoperrone.com';
+    }
+    // Cartera compartida: clientes, pólizas, cobranzas, etc. (todo menos "data").
+    match /{coleccion}/{doc} {
+      allow read, write: if autorizado() && coleccion != 'data';
+    }
+    // Datos privados (comisiones): solo Leandro, y solo los suyos.
+    match /data/users/{uid}/{doc} {
+      allow read, write: if esLeandro() && request.auth.uid == uid;
+    }
+  }
+}

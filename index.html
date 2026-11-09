@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="es-AR"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d5c63">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Cartera LP Seguros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky top bar with section tabs; dashboard = KPI strip + two-column grid of work queues that stacks on phones. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --surface-2:#eaeef2; --line:#d5dce3;
+  --ink:#122130; --ink-2:#4a5a6a; --ink-3:#7a8896;
+  --accent:#0d5c63; --accent-ink:#ffffff; --accent-soft:#d9ecec;
+  --ok:#1f7a45; --ok-soft:#dcf0e3; --warn:#9a5b00; --warn-soft:#fbecd2; --bad:#b42318; --bad-soft:#fbe0dd;
+  --wa:#127a3e;
+  --f-display:"Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e161d; --surface:#152029; --surface-2:#1c2a35; --line:#2a3a47;
+  --ink:#e6edf2; --ink-2:#a9b8c4; --ink-3:#7d8e9b;
+  --accent:#5fc0c4; --accent-ink:#06282b; --accent-soft:#163a3e;
+  --ok:#5fd08e; --ok-soft:#173826; --warn:#f0b35a; --warn-soft:#3a2b14; --bad:#ff8a7e; --bad-soft:#41201d;
+  --wa:#4fd18a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e161d; --surface:#152029; --surface-2:#1c2a35; --line:#2a3a47;
+  --ink:#e6edf2; --ink-2:#a9b8c4; --ink-3:#7d8e9b;
+  --accent:#5fc0c4; --accent-ink:#06282b; --accent-soft:#163a3e;
+  --ok:#5fd08e; --ok-soft:#173826; --warn:#f0b35a; --warn-soft:#3a2b14; --bad:#ff8a7e; --bad-soft:#41201d;
+  --wa:#4fd18a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14.5px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:12px 0}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:auto}
+.brand b{font-family:var(--f-display);font-weight:800;font-size:19px;letter-spacing:-.01em}
+.brand span{font-size:12px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;width:100%;scrollbar-width:none}
+nav.tabs a{font-family:var(--f-display);font-weight:600;font-size:14px;color:var(--ink-2);text-decoration:none;padding:10px 12px;border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs a .n{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);margin-left:4px}
+main{padding-block:20px 48px;display:grid;gap:20px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
+h1{font-size:22px;font-weight:700}
+h2{font-size:15px;font-weight:700;letter-spacing:.01em}
+.muted{color:var(--ink-3)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+button,.btn{font:inherit;font-weight:500;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;line-height:1.2}
+button:hover,.btn:hover{border-color:var(--ink-3)}
+button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,nav.tabs a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.primary:hover{filter:brightness(1.08);border-color:var(--accent)}
+.sm{padding:4px 9px;font-size:13px}
+.wa{color:var(--wa);border-color:color-mix(in srgb,var(--wa) 45%,var(--line))}
+.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,var(--line))}
+.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:4px}
+.kpi .l{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)}
+.kpi .v{font-family:var(--f-display);font-weight:700;font-size:26px;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12.5px;color:var(--ink-2)}
+.kpi.alert .v{color:var(--bad)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-width:0;display:flex;flex-direction:column}
+.panel>header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.panel>header .count{font-family:var(--f-mono);font-size:12px;background:var(--surface-2);border-radius:20px;padding:1px 8px;color:var(--ink-2)}
+.panel>header .go{margin-left:auto;font-size:13px;color:var(--accent);text-decoration:none}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.rows li:last-child{border-bottom:0}
+.rows .main{flex:1 1 200px;min-width:0}
+.rows .t{font-weight:600}
+.rows .d{font-size:12.5px;color:var(--ink-2)}
+.rows .acts{display:flex;gap:6px;flex-wrap:wrap}
+td .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.empty{padding:18px 16px;color:var(--ink-3);font-size:13.5px}
+.chip{display:inline-flex;align-items:center;font-size:11.5px;font-weight:600;border-radius:20px;padding:2px 8px;white-space:nowrap;background:var(--surface-2);color:var(--ink-2)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.acc{background:var(--accent-soft);color:var(--accent)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.toolbar h1{margin-right:auto}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;min-width:0}
+.toolbar input[type=search]{width:auto;flex:1 1 200px;max-width:320px}
+.toolbar select{width:auto}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);font-weight:600;background:var(--surface-2)}
+tr:last-child td{border-bottom:0}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
+td.num,th.num{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.bars{display:grid;gap:10px;padding:14px 16px}
+.barrow{display:grid;grid-template-columns:110px minmax(0,1fr) 170px;gap:10px;align-items:center;font-size:13px}.barrow>span:last-child{text-align:right;white-space:nowrap}
+.barrow .track{height:10px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.barrow .fill{height:100%;background:var(--accent);border-radius:5px}
+.notice{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:13.5px}
+.notice button{margin-left:auto}
+dialog{border:1px solid var(--line);border-radius:14px;padding:0;background:var(--surface);color:var(--ink);width:min(720px,calc(100vw - 24px));max-height:calc(100dvh - 32px)}
+dialog::backdrop{background:rgba(10,20,30,.45)}
+dialog form{display:flex;flex-direction:column;max-height:calc(100dvh - 34px)}
+.dhead{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.dhead h2{font-size:17px;margin-right:auto}
+.dbody{padding:16px 18px;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+.dfoot{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dfoot .sp{flex:1}
+.fld{display:grid;gap:4px;min-width:0}
+label.fld{font-size:12px;font-weight:600;color:var(--ink-2)}
+.kit{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;margin-top:12px}
+.kitcard{background:linear-gradient(135deg,var(--accent),#0a3f45);color:#fff;border-radius:16px;padding:20px 22px;box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.kitcard .kc-h{display:flex;justify-content:space-between;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:12px;opacity:.9}
+.kitcard .kc-t{font-size:20px;font-weight:700;margin:10px 0 12px}
+.kitcard dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:13.5px}
+.kitcard dt{opacity:.75}.kitcard dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.kitcard .kc-f{margin-top:14px;font-size:11px;opacity:.75}
+.kitphones{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 20px}
+.kitphones h3{font-size:14px;margin:0 0 8px}.kitphones h3+ul,.kitphones h3+ol{margin:0 0 14px}
+.kitphones ul{list-style:none;padding:0;display:grid;gap:8px}.kitphones li{display:flex;justify-content:space-between;gap:12px;font-size:13.5px}
+.kitphones li span{text-align:right;font-family:var(--f-mono)}.kitphones ol{list-style:decimal;padding-left:18px;font-size:13.5px;display:grid;gap:4px}
+@media (max-width:760px){.kit{grid-template-columns:1fr}}
+@media print{header.top,.noprint,.toast{display:none!important}body{background:#fff}.kit{grid-template-columns:1fr 1fr}.kitcard{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.fld.full{grid-column:1/-1}
+.fld label,.fld .lab{font-size:12px;font-weight:600;color:var(--ink-2)}
+.checks{display:flex;flex-wrap:wrap;gap:6px 14px}
+.checks label{font-weight:400;font-size:13.5px;display:flex;gap:6px;align-items:center;color:var(--ink)}
+.checks input{width:auto}
+.related{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:8px}
+.related .rows li{padding:8px 0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:13.5px;z-index:20}
+.loading{padding:40px 0;text-align:center;color:var(--ink-3)}
+@media (max-width:860px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){.dbody{grid-template-columns:minmax(0,1fr)}.kpi .v{font-size:22px}.barrow{grid-template-columns:70px minmax(0,1fr) 150px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head><body>
+<header class="top">
+  <div class="wrap bar">
+    <div class="brand"><b>Cartera</b><span>LP Seguros</span></div>
+    <span id="userBox"></span><button class="primary sm" id="btnNew" type="button" hidden>+ Nuevo</button>
+    <nav class="tabs" id="tabs" aria-label="Secciones">
+      <a href="#panel" data-v="panel">Hoy</a>
+      <a href="#clientes" data-v="clientes">Clientes<span class="n" id="n_clientes"></span></a>
+      <a href="#polizas" data-v="polizas">Pólizas<span class="n" id="n_polizas"></span></a>
+      <a href="#renovaciones" data-v="renovaciones">Renovaciones<span class="n" id="n_ren"></span></a>
+      <a href="#cobranzas" data-v="cobranzas">Cobranzas<span class="n" id="n_cobranzas"></span></a>
+      <a href="#oportunidades" data-v="oportunidades">Oportunidades<span class="n" id="n_oportunidades"></span></a>
+      <a href="#siniestros" data-v="siniestros">Siniestros<span class="n" id="n_siniestros"></span></a>
+      <a href="#alertas" data-v="alertas">Alertas<span class="n" id="n_alertas" style="color:var(--bad)"></span></a>
+      <a href="#recordatorios" data-v="recordatorios">Recordatorios<span class="n" id="n_rec"></span></a>
+      <a href="#aumentos" data-v="aumentos">Aumentos</a>
+      <a href="#tablero" data-v="tablero">Tablero</a>
+      <a href="#comisiones" data-v="comisiones" id="tabCom" hidden>🔒 Comisiones</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap" id="view"><div class="loading">Cargando la cartera…</div></main>
+
+<dialog id="dlg"><form id="frm" method="dialog" novalidate>
+  <div class="dhead"><h2 id="dTitle">Editar</h2><button type="button" class="sm" id="dClose">Cerrar</button></div>
+  <div class="dbody" id="dBody"></div>
+  <div class="dfoot"><button type="button" class="danger" id="dDel">Eliminar</button><button type="button" id="dKit" hidden>Kit de bienvenida</button><span class="sp"></span><button type="button" id="dCancel">Cancelar</button><button type="submit" class="primary" id="dSave">Guardar</button></div>
+</form></dialog>
+<dialog id="impDlg"><form method="dialog" novalidate>
+  <div class="dhead"><h2>Importar teléfonos</h2><button type="button" class="sm" data-act="impclose">Cerrar</button></div>
+  <div class="dbody" style="display:block">
+    <p class="muted" style="font-size:13.5px;margin-top:0">Subí un Excel o CSV con una columna de <b>teléfono</b> y otra de <b>nombre</b> o <b>DNI/CUIT</b> (la primera fila con los títulos). También podés pegar las filas copiadas desde Excel. Se busca cada cliente por DNI y, si no hay, por nombre.</p>
+    <input type="file" id="impFile" accept=".xlsx,.xls,.csv">
+    <textarea id="impTxt" rows="5" placeholder="O pegá acá: Nombre[tab]DNI[tab]Teléfono" style="margin-top:8px;width:100%"></textarea>
+    <div style="margin-top:8px"><button type="button" class="sm" data-act="impparse">Revisar lo pegado</button></div>
+    <div id="impRes"></div>
+  </div>
+</form></dialog>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{})</script>
+<script>
+(function(){
+const RESP=["Leandro","Vera"];
+const RAMOS=["Auto","Moto","Hogar","Incendio","Vida","Accidentes personales","Responsabilidad civil","Integral de comercio","Consorcio","ART","Caución","Salud","Otro"];
+const COMPANIAS=["Mercantil Andina","Galicia Seguros","ATM Seguros","La Holando","La Equitativa del Plata","Nación Seguros","Federación Patronal","San Cristóbal","Sancor","Rivadavia","La Segunda","Allianz","Zurich","Mapfre"];
+const ESTADO_POL=["Solicitada","En emisión","Observada","Emitida","Anulada"];
+const RENOV=["Pendiente","Cotizada","Enviada al cliente","Renovada","Perdida"];
+const CERR=["Renovada","Perdida","No renueva"];
+let me={uid:null,owner:false},COM=null,comUnsub=null;
+
+const ESTADO_COB=["A cobrar","Avisado","Pagada","Rechazada débito"];
+const ETAPAS=["Contactado","Cotizando","Propuesta enviada","Emitida","Perdida"];
+const DOCS_EMISION={
+ "Auto":["DNI del titular","Cédula verde o título","Registro de conducir","Fotos de los 4 lados, km y patente","Inspección realizada","Medio de pago (tarjeta o CBU)","Solicitud firmada"],
+ "Moto":["DNI del titular","Cédula o título","Registro de conducir","Fotos de la moto y patente","Medio de pago (tarjeta o CBU)","Solicitud firmada"],
+ "Hogar":["DNI del titular","Domicilio exacto del riesgo","Metros cuadrados y tipo de construcción","Sumas aseguradas (edificio y contenido)","Fotos de la vivienda (si la compañía las pide)","Medio de pago (tarjeta o CBU)","Solicitud firmada"],
+ "Vida":["DNI del asegurado","Fecha de nacimiento","Beneficiarios con DNI y porcentaje","Declaración de salud firmada","Medio de pago (tarjeta o CBU)","Solicitud firmada"],
+ "Integral de comercio":["CUIT y constancia de AFIP","Domicilio del local","Actividad y metros cuadrados","Sumas aseguradas (edificio, contenido, mercadería)","Medidas de seguridad (alarma, rejas, matafuegos)","Fotos del local","Medio de pago","Solicitud firmada"],
+ "ART":["CUIT y constancia de AFIP","Formulario 931 último","Nómina de personal (CUIL, salario, tarea)","Actividad (CIIU)","Formulario de afiliación firmado"],
+ "Caución":["CUIT y constancia de AFIP","Pliego o contrato que exige la garantía","Últimos balances o DDJJ","Contragarantía firmada","Solicitud firmada"],
+ "Incendio":["DNI del titular","Domicilio exacto del riesgo","Suma asegurada","Medio de pago (tarjeta o CBU)","Solicitud firmada"],
+ "Accidentes personales":["DNI del asegurado","Fecha de nacimiento","Actividad / tarea que realiza","Beneficiarios con DNI","Medio de pago (tarjeta o CBU)","Solicitud firmada"],
+ "Responsabilidad civil":["DNI / CUIT","Actividad o profesión (matrícula si corresponde)","Suma asegurada","Medio de pago (tarjeta o CBU)","Solicitud firmada"],
+ "Consorcio":["CUIT del consorcio","Datos del administrador","Domicilio del edificio","Cantidad de unidades y metros cuadrados","Sumas aseguradas (edificio, RC, cristales)","Medio de pago","Solicitud firmada"],
+ "Salud":["DNI de cada integrante","Declaración jurada de salud","Medio de pago","Solicitud firmada"],
+ "Otro":["DNI / CUIT","Datos del riesgo","Medio de pago","Solicitud firmada"]};
+const TIPOS_STRO=["Choque / daños parciales","Choque con lesiones","Robo total","Robo parcial","Granizo","Rotura de cristales","Incendio","Robo en hogar / comercio","Daños por agua","Responsabilidad civil","Accidente personal / vida","Otro"];
+const ESTADOS_STRO=["Denunciado","Falta documentación","En análisis","Inspección / peritaje","En liquidación","Pagado","Rechazado","Cerrado"];
+const DOCS_STRO={
+ "Choque / daños parciales":["Denuncia administrativa firmada","DNI del conductor","Registro del conductor","Cédula verde","Fotos de los daños","Datos del tercero (nombre, DNI, patente, compañía, póliza)","Presupuesto de reparación","Croquis o relato del hecho"],
+ "Choque con lesiones":["Denuncia administrativa firmada","Exposición o denuncia policial","DNI del conductor","Registro del conductor","Cédula verde","Fotos de los daños","Datos del tercero y su compañía","Datos de lesionados y certificados médicos"],
+ "Robo total":["Denuncia policial","Denuncia administrativa firmada","Título del automotor","Cédula verde","Juego de llaves completo","Formulario 08 firmado y certificado","Formulario 12 (verificación)","Baja / denuncia de robo en el Registro","Libre deuda de patentes e infracciones"],
+ "Robo parcial":["Denuncia policial","Denuncia administrativa firmada","Fotos del faltante o daño","Presupuesto o factura de reposición","Cédula verde"],
+ "Granizo":["Denuncia administrativa firmada","Fotos de los daños","Presupuesto de reparación","Cédula verde"],
+ "Rotura de cristales":["Denuncia administrativa firmada","Fotos del cristal dañado","Presupuesto de reposición","Cédula verde"],
+ "Incendio":["Denuncia administrativa firmada","Acta de bomberos","Denuncia policial","Fotos de los daños","Presupuestos o facturas"],
+ "Robo en hogar / comercio":["Denuncia policial","Denuncia administrativa firmada","Listado de bienes robados con valores","Facturas o fotos de los bienes","Fotos de daños (cerradura, aberturas)"],
+ "Daños por agua":["Denuncia administrativa firmada","Fotos de los daños","Informe del plomero / causa","Presupuesto de reparación"],
+ "Responsabilidad civil":["Denuncia administrativa firmada","Reclamo recibido (carta, mail, demanda)","Relato del hecho","Datos del reclamante"],
+ "Accidente personal / vida":["Denuncia firmada","DNI del asegurado","Certificado médico / historia clínica","Acta de defunción (si corresponde)","DNI de beneficiarios"],
+ "Otro":["Denuncia administrativa firmada","Fotos","Presupuesto","Documentación respaldatoria"]};
+function docList(f,src){const m=f.map==="emision"?DOCS_EMISION:DOCS_STRO;return m[src]||[]}
+function docsFalta(x,col){const f=SCHEMA[col].fields.find(f=>f.t==="checklist");const src=x[f.src];const list=docList(f,src);const v=x[f.k]||{};return list.filter(i=>!v[i])}
+function renderChecklist(f,val){const box=$("#ck_"+f.k);if(!box)return;const src=($("#f_"+f.src)||{}).value;const list=docList(f,src);
+  if(!src){box.innerHTML='<div class="muted" style="font-size:13px">Elegí '+(f.src==="ramo"?"el ramo":"el tipo de siniestro")+' para ver qué documentación hace falta.</div>';return}
+  const v=val||{};const ok=list.filter(i=>v[i]).length;
+  box.innerHTML='<div class="muted" style="font-size:12px;margin-bottom:4px">'+ok+' de '+list.length+' recibidos</div><div class="checks" style="flex-direction:column;gap:6px">'+list.map((i,n)=>'<label><input type="checkbox" data-ck="'+esc(f.k)+'" value="'+esc(i)+'"'+(v[i]?" checked":"")+'>'+esc(i)+'</label>').join("")+'</div>';
+}
+function readChecklist(k){const o={};document.querySelectorAll('input[data-ck="'+k+'"]').forEach(i=>{if(i.checked)o[i.value]=true});return o}
+document.addEventListener("change",e=>{if(!cur||!$("#dlg").open)return;const sc=SCHEMA[cur.col];const f=sc.fields.find(f=>f.t==="checklist");if(!f)return;
+  if(e.target.id==="f_"+f.src||e.target.dataset.ck)renderChecklist(f,readChecklist(f.k))});
+function docsMsg(nombre,titulo,faltan){return "Hola "+first(nombre)+"! Te escribo de LP Seguros por "+titulo+". Para avanzar me falta que me mandes:\n"+faltan.map(i=>"• "+i).join("\n")+"\n\nCuando lo tengas, mandámelo por acá. ¡Gracias!"}
+
+const SCHEMA={
+ clientes:{one:"cliente",title:c=>(c.nombre||"Cliente")+(c.nroCuenta?" · Cuenta Nº "+c.nroCuenta:""),fields:[
+  {k:"nombre",l:"Nombre o razón social",t:"text",req:1,full:1},
+  {k:"pila",l:"Nombre para los mensajes (ej. Juan)",t:"text"},
+  {k:"tipo",l:"Tipo",t:"select",o:["Persona","PyME","Consorcio"]},
+  {k:"dni",l:"DNI / CUIT",t:"text"},
+  {k:"telefono",l:"Teléfono (WhatsApp)",t:"tel"},
+  {k:"telefono2",l:"Otro teléfono / contacto",t:"text"},
+  {k:"email",l:"Email",t:"email"},
+  {k:"localidad",l:"Localidad",t:"text"},
+  {k:"nacimiento",l:"Fecha de nacimiento",t:"date"},
+  {k:"origen",l:"Origen",t:"select",o:["Referido","Estudio jurídico","Estudio contable","Instagram","Boletín Oficial","Woker","Otro"]},
+  {k:"responsable",l:"Responsable",t:"select",o:RESP},
+  {k:"ultimoContacto",l:"Último contacto",t:"date"},
+  {k:"proximoContacto",l:"Próximo contacto",t:"date"},
+  {k:"necesidades",l:"Necesidades detectadas (lo que podría contratar)",t:"multi",o:RAMOS,full:1},
+  {k:"notas",l:"Notas",t:"textarea",full:1}]},
+ polizas:{one:"póliza",title:p=>(p.ramo||"Póliza")+" · "+cliName(p.clienteId),fields:[
+  {k:"clienteId",l:"Cliente",t:"ref",ref:"clientes",req:1,full:1},
+  {k:"ramo",l:"Ramo",t:"select",o:RAMOS,req:1},
+  {k:"compania",l:"Compañía",t:"text",list:"companias"},
+  {k:"numero",l:"Nº de póliza",t:"text"},
+  {k:"bien",l:"Bien asegurado",t:"text"},
+  {k:"cobertura",l:"Cobertura",t:"text",full:1},
+  {k:"estado",l:"Estado de emisión",t:"select",o:ESTADO_POL},
+  {k:"fechaSolicitud",l:"Fecha de solicitud",t:"date"},
+  {k:"vigDesde",l:"Vigencia desde",t:"date"},
+  {k:"vigHasta",l:"Vigencia hasta",t:"date"},
+  {k:"premio",l:"Premio mensual ($)",t:"number"},
+  {k:"diaCuota",l:"La cuota vence el día (1 a 31)",t:"number"},
+  {k:"formaPago",l:"Forma de pago",t:"select",o:["Débito tarjeta","Débito CBU","Pago manual","Contado"]},
+  {k:"renovacion",l:"Renovación",t:"select",o:RENOV},
+  {k:"responsable",l:"Responsable",t:"select",o:RESP},
+  {k:"enviada",l:"Póliza enviada al cliente",t:"check",full:1},
+  {k:"docsEmision",l:"Documentación para emitir",t:"checklist",src:"ramo",map:"emision",full:1},
+  {k:"archivos",l:"Archivos (póliza, frente, certificado de cobertura)",t:"files",full:1},
+  {k:"notas",l:"Notas",t:"textarea",full:1}]},
+ cobranzas:{one:"cuota",title:c=>"Cuota "+(c.periodo||"")+" · "+polName(c.polizaId),fields:[
+  {k:"polizaId",l:"Póliza",t:"ref",ref:"polizas",req:1,full:1},
+  {k:"periodo",l:"Período (ej. 11/2026)",t:"text"},
+  {k:"vencimiento",l:"Vencimiento",t:"date",req:1},
+  {k:"importe",l:"Importe ($)",t:"number"},
+  {k:"estado",l:"Estado",t:"select",o:ESTADO_COB},
+  {k:"fechaPago",l:"Fecha de pago",t:"date"},
+  {k:"medio",l:"Medio",t:"select",o:["Débito tarjeta","Débito CBU","Transferencia","Efectivo","Link de pago"]},
+  {k:"notas",l:"Notas",t:"textarea",full:1}]},
+ oportunidades:{one:"oportunidad",title:o=>(o.prospecto||cliName(o.clienteId))+" · "+((o.ramos||[]).join(", ")||"Oportunidad"),fields:[
+  {k:"clienteId",l:"Cliente de la cartera (si ya es cliente)",t:"ref",ref:"clientes",full:1},
+  {k:"prospecto",l:"Prospecto (si todavía no es cliente)",t:"text"},
+  {k:"telefono",l:"Teléfono",t:"tel"},
+  {k:"ramos",l:"Ramo",t:"multi",o:RAMOS,full:1},
+  {k:"etapa",l:"Etapa",t:"select",o:ETAPAS},
+  {k:"prima",l:"Prima mensual estimada ($)",t:"number"},
+  {k:"proximoPaso",l:"Próximo paso",t:"text"},
+  {k:"fechaProximo",l:"Fecha próximo paso",t:"date"},
+  {k:"responsable",l:"Responsable",t:"select",o:RESP},
+  {k:"notas",l:"Notas",t:"textarea",full:1}]},
+ siniestros:{one:"siniestro",title:x=>"Siniestro · "+cliName(x.clienteId)+(x.tipo?" · "+x.tipo:""),fields:[
+  {k:"clienteId",l:"Cliente",t:"ref",ref:"clientes",req:1,full:1},
+  {k:"polizaId",l:"Póliza",t:"ref",ref:"polizas",full:1},
+  {k:"tipo",l:"Tipo de siniestro",t:"select",o:TIPOS_STRO,req:1},
+  {k:"fecha",l:"Fecha del hecho",t:"date",req:1},
+  {k:"estado",l:"Estado",t:"select",o:ESTADOS_STRO},
+  {k:"fechaDenuncia",l:"Fecha de denuncia",t:"date"},
+  {k:"numero",l:"Nº de siniestro (compañía)",t:"text"},
+  {k:"lugar",l:"Lugar",t:"text"},
+  {k:"descripcion",l:"Qué pasó",t:"textarea",full:1},
+  {k:"tercero",l:"Datos del tercero (nombre, patente, compañía, póliza)",t:"textarea",full:1},
+  {k:"montoReclamado",l:"Monto reclamado / presupuesto ($)",t:"number"},
+  {k:"montoPagado",l:"Monto pagado ($)",t:"number"},
+  {k:"proximoPaso",l:"Próximo paso",t:"text"},
+  {k:"fechaProximo",l:"Fecha próximo paso",t:"date"},
+  {k:"responsable",l:"Responsable",t:"select",o:RESP},
+  {k:"docs",l:"Documentación del siniestro",t:"checklist",src:"tipo",map:"stro",full:1},
+  {k:"archivos",l:"Archivos (denuncia, fotos, presupuestos)",t:"files",full:1},
+  {k:"notas",l:"Notas",t:"textarea",full:1}]}
+};
+const COLS=Object.keys(SCHEMA);
+const S={clientes:[],polizas:[],cobranzas:[],oportunidades:[],siniestros:[],recordatorios:[],config:[]};let assets=null;
+const loaded={};let db=null;let view="panel";const filt={q:"",f:""};
+
+// ---------- helpers
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+function todayISO(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function days(iso){if(!iso)return null;const a=new Date(iso+"T00:00:00"),b=new Date(todayISO()+"T00:00:00");return Math.round((a-b)/864e5)}
+function fdate(iso){if(!iso)return "—";const [y,m,d]=iso.split("-");return d+"/"+m+"/"+y.slice(2)}
+const money=n=>new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(+n||0);
+const byId=(col,id)=>S[col].find(x=>x.id===id);
+function cliName(id){const c=byId("clientes",id);return c?c.nombre:"Sin cliente"}
+function polName(id){const p=byId("polizas",id);return p?(p.ramo||"Póliza")+" · "+cliName(p.clienteId):"Sin póliza"}
+function vigente(p){return p.estado==="Emitida"&&(!p.vigHasta||days(p.vigHasta)>=0)}
+function impTxt(c){return +c.importe>0?" por "+money(c.importe):""}
+function impShow(c){return +c.importe>0?money(c.importe):"a cargar"}
+function ultImporte(pid){const ks=S.cobranzas.filter(k=>k.polizaId===pid&&+k.importe>0&&k.vencimiento).sort((a,b)=>b.vencimiento.localeCompare(a.vencimiento));return ks.length?+ks[0].importe:0}
+function mesKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
+const MESES_L=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function cuotasFaltantes(mk){const [y,m]=mk.split("-").map(Number);const last=new Date(y,m,0).getDate();return S.polizas.filter(p=>+p.diaCuota&&vigente(p)&&!S.cobranzas.some(k=>k.polizaId===p.id&&(k.vencimiento||"").slice(0,7)===mk)).map(p=>({p,venc:mk+"-"+String(Math.min(+p.diaCuota,last)).padStart(2,"0")}))}
+function mesAGenerar(){const t=new Date(todayISO()+"T12:00:00");const a=mesKey(t);if(cuotasFaltantes(a).length)return a;const n=new Date(t.getFullYear(),t.getMonth()+1,1);return mesKey(n)}
+function cobVencida(c){return c.estado!=="Pagada"&&c.vencimiento&&days(c.vencimiento)<0}
+function waNum(t){let d=String(t||"").replace(/\D/g,"");if(!d)return "";if(d.startsWith("0"))d=d.slice(1);if(!d.startsWith("54"))d="549"+d;return d}
+function waBtn(tel,msg){const n=waNum(tel);if(!n)return "";return '<a class="btn sm wa" target="_blank" rel="noopener" href="https://wa.me/'+n+'?text='+encodeURIComponent(msg)+'">WhatsApp</a>'}
+const first=n=>String(n||"").split(/[ ,]/)[0];
+function toast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+function err(e){console.error(e);toast(e&&(e.code==="not_granted"||e.code==="permission-denied")?"No tenés permiso para editar esta cartera.":"No se pudo guardar. Revisá la conexión e intentá de nuevo.")}
+
+// ---------- data
+let unsubs=[];
+function loginScreen(msg){$("#view").innerHTML='<section class="panel" style="max-width:420px;margin:40px auto;padding:28px;display:grid;gap:14px;text-align:center"><img src="icons/icon-192.png" alt="" width="72" height="72" style="margin:0 auto;border-radius:16px"><h1>Cartera LP Seguros</h1><p class="muted" style="margin:0">Entrá con tu cuenta autorizada.</p>'+(msg?'<p style="color:var(--bad);margin:0">'+esc(msg)+'</p>':'')+'<form id="pwForm" style="display:grid;gap:8px;text-align:left"><label class="lab" for="lgMail" style="font-size:12px;font-weight:600">Mail</label><input id="lgMail" type="email" autocomplete="username" required><label class="lab" for="lgPass" style="font-size:12px;font-weight:600">Contraseña</label><input id="lgPass" type="password" autocomplete="current-password" required><button type="submit" class="primary" style="justify-content:center">Entrar</button><button type="button" class="sm" id="btnReset" style="justify-self:start;border:0;padding:0;background:none;color:var(--accent)">Olvidé mi contraseña</button></form><div class="muted" style="font-size:12px">o</div><button type="button" id="btnLogin" style="justify-content:center">Entrar con Google</button></section>';
+  $("#pwForm").onsubmit=e=>{e.preventDefault();firebase.auth().signInWithEmailAndPassword($("#lgMail").value.trim(),$("#lgPass").value).catch(er=>loginScreen(er.code==="auth/invalid-credential"||er.code==="auth/wrong-password"||er.code==="auth/user-not-found"?"Mail o contraseña incorrectos.":"No se pudo entrar: "+er.message))};
+  $("#btnReset").onclick=()=>{const m=$("#lgMail").value.trim();if(!m){toast("Escribí tu mail primero");return}firebase.auth().sendPasswordResetEmail(m).then(()=>toast("Te mandamos un mail para cambiar la contraseña")).catch(()=>toast("No se pudo enviar el mail"))};
+  $("#btnLogin").onclick=()=>firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{if(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment")firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider());else loginScreen("No se pudo entrar: "+e.message)})}
+function boot(){
+  if(!window.firebase||!window.FIREBASE_CONFIG||!FIREBASE_CONFIG.apiKey){$("#view").innerHTML='<div class="empty">Falta configurar Firebase (archivo firebase-config.js).</div>';return}
+  firebase.initializeApp(FIREBASE_CONFIG);
+  firebase.firestore().enablePersistence({synchronizeTabs:true}).catch(()=>{});
+  firebase.auth().onAuthStateChanged(u=>{
+    unsubs.forEach(f=>f());unsubs=[];COM=null;me={uid:null,owner:false};$("#tabCom").hidden=true;COLS.forEach(c=>{S[c]=[];loaded[c]=0});
+    $("#userBox").innerHTML=u?'<span class="muted" style="font-size:12px">'+esc(u.email)+'</span> <button type="button" class="sm" id="btnLogout">Salir</button>':"";
+    if(u)$("#btnLogout").onclick=()=>firebase.auth().signOut();
+    $("#btnNew").hidden=!u;$("#tabs").hidden=!u;
+    if(!u){db=null;loginScreen();return}
+    db=firebase.firestore();
+    assets=(window.STORAGE_ENABLED&&firebase.storage)?{upload:async f=>{const path="archivos/"+Date.now()+"-"+f.name.replace(/[^\w.\-]+/g,"_");const r=await firebase.storage().ref(path).put(f);const url=await r.ref.getDownloadURL();return {id:path,url,sizeBytes:f.size,contentType:f.type}}}:null;
+    $("#view").innerHTML='<div class="loading">Cargando la cartera…</div>';
+    start();
+  });
+}
+function start(){
+  const denied=e=>{console.error(e);if(e&&e.code==="permission-denied"){loginScreen("Tu cuenta no tiene acceso a esta cartera. Pedile a Leandro que la habilite.");}};
+  const u=firebase.auth().currentUser;me.uid=u.uid;me.owner=(u.email||"").toLowerCase()==="leandro@estudiojuridicoperrone.com";
+  if(me.owner){$("#tabCom").hidden=false;unsubs.push(db.collection("data/users/"+me.uid).doc("comisiones").onSnapshot(d=>{COM=d.exists?(d.data()||{}):{porCompania:{},porPoliza:{}};if(view==="comisiones")render()},e=>{console.error(e);COM={porCompania:{},porPoliza:{}}}))}
+  unsubs.push(db.collection("config").onSnapshot(snap=>{S.config=snap.docs.map(d=>Object.assign({id:d.id},d.data()));render()},e=>console.error(e)));
+  unsubs.push(db.collection("recordatorios").onSnapshot(snap=>{S.recordatorios=snap.docs.map(d=>Object.assign({id:d.id},d.data()));render()},denied));
+  COLS.forEach(col=>{
+    unsubs.push(db.collection(col).onSnapshot(snap=>{
+      S[col]=snap.docs.map(d=>Object.assign({id:d.id},d.data()));loaded[col]=1;render();
+    },e=>{denied(e);}));
+  });
+}
+async function save(col,id,data){
+  data.updatedAt=new Date().toISOString();
+  if(col==="clientes"&&!data.nroCuenta)data.nroCuenta=nextNro();
+  if(col==="polizas"){const old=id?byId("polizas",id)||{}:{};const t=todayISO();
+    if(data.renovacion==="Renovada"&&old.renovacion!=="Renovada")data.fechaRenov=t;
+    if((data.renovacion==="Perdida"&&old.renovacion!=="Perdida")||(data.estado==="Anulada"&&old.estado!=="Anulada"))data.fechaBaja=t;}
+  if(id){await db.collection(col).doc(id).set(data)}else{data.createdAt=data.updatedAt;await db.collection(col).add(data)}
+}
+async function patch(col,id,data){try{await db.collection(col).doc(id).update(data);}catch(e){err(e)}}
+
+// ---------- routing
+function route(){const h=location.hash.slice(1);view=SCHEMA[h]||["panel","aumentos","recordatorios","alertas","renovaciones","tablero","comisiones"].includes(h)||h.startsWith("cuenta-")||h.startsWith("kit-")?h:"panel";filt.q="";filt.f="";render()}
+window.addEventListener("hashchange",route);
+
+function render(){
+  document.querySelectorAll("#tabs a").forEach(a=>{if(a.dataset.v===view||(a.dataset.v==="clientes"&&view.startsWith("cuenta-")))a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  COLS.forEach(c=>{const el=$("#n_"+c);if(el)el.textContent=S[c].length||""});
+  if(COLS.every(c=>loaded[c])){const r=reminders().length;$("#n_rec").textContent=r||"";$("#n_ren").textContent=renovPend().length||"";const a=alertas().filter(x=>x.lvl==="bad").length;$("#n_alertas").textContent=a||""}
+  if(!COLS.every(c=>loaded[c])){return}
+  const v=$("#view");const ae=document.activeElement,keepFocus=ae&&ae.id==="q",keepMsg=ae&&ae.id==="msgTxt"?[ae.selectionStart,ae.selectionEnd]:null;
+  v.innerHTML=view==="panel"?panel():view==="aumentos"?aumentos():view==="recordatorios"?recordatorios():view==="alertas"?alertasView():view.startsWith("cuenta-")?cuenta(view.slice(7)):view==="renovaciones"?renovaciones():view==="tablero"?tablero():view==="comisiones"?comisiones():view.startsWith("kit-")?kit(view.slice(4)):list(view);
+  if(keepMsg){const m=$("#msgTxt");if(m){m.focus();m.setSelectionRange(keepMsg[0],keepMsg[1])}}
+  if(keepFocus){const q=$("#q");if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}}
+}
+
+// ---------- dashboard
+function panel(){
+  const pols=S.polizas,vig=pols.filter(vigente);
+  const premio=vig.reduce((a,p)=>a+(+p.premio||0),0);
+  const venc=S.cobranzas.filter(cobVencida);const deuda=venc.reduce((a,c)=>a+(+c.importe||0),0);
+  const renov=pols.filter(p=>p.estado==="Emitida"&&p.vigHasta&&days(p.vigHasta)>=-120&&days(p.vigHasta)<=45&&!CERR.includes(p.renovacion)).sort((a,b)=>a.vigHasta.localeCompare(b.vigHasta));
+  const semana=S.cobranzas.filter(c=>c.estado!=="Pagada"&&c.vencimiento&&days(c.vencimiento)>=0&&days(c.vencimiento)<=7);
+  const emis=pols.filter(p=>["Solicitada","En emisión","Observada"].includes(p.estado||"Solicitada"));
+  const sinEnviar=pols.filter(p=>p.estado==="Emitida"&&!p.enviada);
+  const contactar=S.clientes.filter(c=>(c.proximoContacto&&days(c.proximoContacto)<=0)||!c.ultimoContacto||days(c.ultimoContacto)<=-60).sort((a,b)=>(a.ultimoContacto||"").localeCompare(b.ultimoContacto||""));
+  const cross=crossSell();
+  const segs=S.oportunidades.filter(o=>!["Emitida","Perdida"].includes(o.etapa)&&o.fechaProximo&&days(o.fechaProximo)<=0);
+  const hasExamples=COLS.some(c=>S[c].some(x=>x.ejemplo));
+  const total=COLS.reduce((a,c)=>a+S[c].length,0);
+  let h="";
+  if(hasExamples)h+='<div class="notice"><span>Estás viendo datos de <b>ejemplo</b> para mostrar cómo funciona. Cuando cargues tu cartera, borralos.</span><button type="button" class="sm" id="btnClearEx" data-act="clearex">Borrar ejemplos</button></div>';
+  if(!total)h+='<div class="notice"><span>La cartera está vacía. Empezá cargando un cliente con <b>+ Nuevo</b>, o importá el Excel exportado de Woker.</span></div>';
+  const al=alertas(),alb=al.filter(a=>a.lvl==="bad").length;if(al.length)h+='<div class="notice" style="background:var(--bad-soft);color:var(--bad)"><span>🔔 <b>'+al.length+' alerta'+(al.length===1?'':'s')+'</b>'+(alb?' ('+alb+' urgente'+(alb===1?'':'s')+')':'')+': '+esc(al.slice(0,2).map(a=>a.titulo+" · "+a.quien).join(" / "))+(al.length>2?"…":"")+'</span><a class="btn sm" href="#alertas">Ver alertas</a></div>';
+  const nr=reminders().length;if(nr)h+='<div class="notice" style="background:var(--accent-soft);color:var(--accent)"><span>Tenés <b>'+nr+' recordatorio'+(nr===1?'':'s')+'</b> para mandar hoy por WhatsApp.</span><a class="btn sm primary" href="#recordatorios">Ver recordatorios</a></div>';
+  h+='<div class="kpis">'+
+    kpi("Clientes",S.clientes.length,S.clientes.filter(c=>S.polizas.some(p=>p.clienteId===c.id&&vigente(p))).length+" con póliza vigente")+
+    kpi("Pólizas vigentes",vig.length,emis.length+" en emisión")+
+    kpi("Premio mensual",money(premio),"cartera vigente")+
+    kpi("Deuda vencida",money(deuda),venc.length+" cuota"+(venc.length===1?"":"s")+" impaga"+(venc.length===1?"":"s"),deuda>0)+'</div>';
+  h+='<div class="grid2">';
+  h+=box("Renovaciones próximas","45 días",renov,p=>{const d=days(p.vigHasta),c=byId("clientes",p.clienteId)||{};
+    return li(esc(cliName(p.clienteId))+' <span class="chip '+(d<0?"bad":d<=15?"warn":"acc")+'">'+(d<0?"vencida hace "+(-d)+" d":d===0?"vence hoy":"en "+d+" días")+'</span>',
+      esc([p.ramo,p.compania,p.bien].filter(Boolean).join(" · "))+" · vence "+fdate(p.vigHasta)+" · "+esc(p.renovacion||"Pendiente"),
+      waBtn(c.telefono,"Hola "+first(c.pila||c.nombre)+"! ¿Cómo estás? Te escribo de LP Seguros: tu póliza de "+(p.ramo||"seguro").toLowerCase()+(p.bien?" ("+p.bien+")":"")+" vence el "+fdate(p.vigHasta)+". Ya estoy revisando la renovación para que no te quedes sin cobertura. ¿Seguimos igual o querés que cotice alternativas?")+btn("Editar","edit","polizas",p.id))},"polizas");
+  h+=box("Cobranza vencida","impagas",venc.sort((a,b)=>a.vencimiento.localeCompare(b.vencimiento)).concat(semana),c=>{const p=byId("polizas",c.polizaId)||{},cl=byId("clientes",p.clienteId)||{},d=days(c.vencimiento);
+    return li(esc(cl.nombre||"Sin cliente")+' <span class="chip '+(d<0?"bad":"warn")+'">'+(d<0?(-d)+" días de atraso":d===0?"vence hoy":"vence en "+d+" d")+'</span>',
+      esc(p.ramo||"")+" · cuota "+esc(c.periodo||"")+" · <span class=mono>"+impShow(c)+"</span> · "+esc(c.estado||"A cobrar"),
+      waBtn(cl.telefono,"Hola "+first(cl.pila||cl.nombre)+"! Te escribo de LP Seguros. "+(d<0?"Figura impaga":"Vence el "+fdate(c.vencimiento))+" la cuota "+(c.periodo||"")+" de tu seguro de "+(p.ramo||"").toLowerCase()+impTxt(c)+". Para no perder la cobertura, ¿me avisás cuando la abones? Cualquier cosa te paso los datos.")+btn("Pagada","paid","cobranzas",c.id))},"cobranzas");
+  const cup=reminders().filter(r=>r.tipo==="Cupón por vencer");
+  h+=box("Cupones para mandar","vencen en 2 días",cup,r=>li(esc(r.c.nombre||"")+' <span class="chip warn">'+esc(r.chip)+'</span>',esc(r.det),(waNum(r.c.telefono)?waBtn(r.c.telefono,r.msg):'<span class="chip warn">sin teléfono</span>')+'<button type="button" class="sm" data-act="done" data-id="'+esc(r.key)+'" data-x="'+esc(r.tipo)+'">Hecho</button>'),"recordatorios");
+  h+=box("Emisiones en curso","",emis.concat(sinEnviar),p=>{const c=byId("clientes",p.clienteId)||{};const st=p.estado||"Solicitada";
+    return li(esc(cliName(p.clienteId))+' <span class="chip '+(st==="Observada"?"bad":st==="Emitida"?"ok":"warn")+'">'+(st==="Emitida"?"emitida, falta enviar":esc(st))+'</span>',
+      esc([p.ramo,p.compania].filter(Boolean).join(" · "))+(p.fechaSolicitud?" · pedida hace "+(-days(p.fechaSolicitud))+" d":""),
+      (st==="Emitida"?'<a class="btn sm primary" href="#kit-'+esc(p.id)+'">Kit de bienvenida</a>'+btn("Marcar enviada","sent","polizas",p.id)+waBtn(c.telefono,"Hola "+first(c.pila||c.nombre)+"! Ya está emitida tu póliza de "+(p.ramo||"").toLowerCase()+(p.compania?" en "+p.compania:"")+". Te la paso por acá. Cualquier duda me escribís."):"")+btn("Editar","edit","polizas",p.id))},"polizas");
+  h+=box("Clientes para contactar","sin contacto 60+ días",contactar,c=>li(esc(c.nombre),
+      (c.ultimoContacto?"último contacto "+fdate(c.ultimoContacto)+" ("+(-days(c.ultimoContacto))+" d)":"sin contacto registrado")+(c.proximoContacto?" · agendado "+fdate(c.proximoContacto):"")+" · "+esc(ramosDe(c.id).join(", ")||"sin pólizas"),
+      waBtn(c.telefono,"Hola "+first(c.pila||c.nombre)+"! ¿Cómo andás? Soy Leandro de LP Seguros. Te escribo para saber cómo estás y si necesitás algo con tus seguros. ¡Cualquier cosa estoy a disposición!")+btn("Contactado hoy","touched","clientes",c.id)),"clientes");
+  h+=box("Oportunidades en la cartera","cross-sell",cross,x=>li(esc(x.c.nombre)+' <span class="chip acc">ofrecer '+esc(x.ofrecer.join(", "))+'</span>',
+      "tiene: "+esc(x.tiene.join(", ")||"nada vigente"),
+      waBtn(x.c.telefono,"Hola "+first(x.c.pila||x.c.nombre)+"! Te escribo de LP Seguros. "+(x.tiene.length?"Ya tenés tu "+x.tiene[0].toLowerCase()+" asegurado con nosotros, y ":"")+"quería ofrecerte cotizar "+x.ofrecer[0].toLowerCase()+" sin compromiso. ¿Te interesa que te arme una propuesta?")+btn("Crear oportunidad","mkopp","clientes",x.c.id,x.ofrecer[0])),"clientes");
+  h+=box("Seguimientos de ventas para hoy","",segs,o=>{const c=byId("clientes",o.clienteId)||{};
+    return li(esc(o.prospecto||c.nombre||"Prospecto")+' <span class="chip">'+esc(o.etapa||"Contactado")+'</span>',esc((o.ramos||[]).join(", "))+" · "+esc(o.proximoPaso||"sin próximo paso")+" · "+fdate(o.fechaProximo),
+      waBtn(o.telefono||c.telefono,"Hola "+first(o.prospecto||c.pila||c.nombre)+"! Te escribo de LP Seguros por la cotización de "+((o.ramos||[])[0]||"tu seguro").toLowerCase()+". ¿Pudiste verla?")+btn("Editar","edit","oportunidades",o.id))},"oportunidades");
+  const sub=subas().filter(x=>x.pct!=null&&x.pct>0&&x.mes===mesActual());
+  h+=box("Aumentos de este mes",mesLabel(mesActual())+" vs. mes anterior",sub,x=>{const c=byId("clientes",x.p.clienteId)||{};
+    return li(esc(cliName(x.p.clienteId))+' '+pctChip(x.pct),esc([x.p.ramo,x.p.compania].filter(Boolean).join(" · "))+' · <span class="mono">'+money(x.prev)+' → '+money(x.last)+'</span>',
+      waBtn(c.telefono,"Hola "+first(c.pila||c.nombre)+"! Te escribo de LP Seguros para avisarte que este mes la cuota de tu seguro de "+(x.p.ramo||"").toLowerCase()+" pasa de "+money(x.prev)+" a "+money(x.last)+" (un "+x.pct.toFixed(1).replace(".",",")+"%), por la actualización de la compañía. Si querés, reviso alternativas para que no pagues de más.")+btn("Ver póliza","edit","polizas",x.p.id))},"aumentos");
+  h+=evoBox(6);
+  h+='</div><div class="grid2">'+ramoBars(vig)+funnel()+'</div>';
+  return h;
+}
+function kpi(l,v,s,alert){return '<div class="kpi'+(alert?" alert":"")+'"><span class="l">'+l+'</span><span class="v">'+v+'</span><span class="s">'+esc(s)+'</span></div>'}
+function box(title,sub,items,fn,go){return '<section class="panel"><header><h2>'+title+'</h2><span class="count">'+items.length+'</span>'+(sub?'<span class="muted" style="font-size:12px">'+sub+'</span>':'')+'<a class="go" href="#'+go+'">Ver todo</a></header>'+(items.length?'<ul class="rows">'+items.slice(0,8).map(fn).join("")+'</ul>'+(items.length>8?'<div class="empty">y '+(items.length-8)+' más</div>':''):'<div class="empty">Nada pendiente acá.</div>')+'</section>'}
+function li(t,d,acts){return '<li><div class="main"><div class="t">'+t+'</div><div class="d">'+d+'</div></div><div class="acts">'+(acts||"")+'</div></li>'}
+function btn(label,act,col,id,extra){return '<button type="button" class="sm" data-act="'+act+'" data-col="'+col+'" data-id="'+esc(id)+'"'+(extra?' data-x="'+esc(extra)+'"':'')+'>'+label+'</button>'}
+function ramosDe(cid){return [...new Set(S.polizas.filter(p=>p.clienteId===cid&&vigente(p)).map(p=>p.ramo).filter(Boolean))]}
+function crossSell(){
+  return S.clientes.map(c=>{
+    const tiene=ramosDe(c.id);const open=S.oportunidades.some(o=>o.clienteId===c.id&&!["Emitida","Perdida"].includes(o.etapa));
+    let ofrecer=(c.necesidades||[]).filter(r=>!tiene.includes(r));
+    if(!ofrecer.length&&tiene.length){const base=(c.tipo==="PyME"||c.tipo==="Consorcio")?["Integral de comercio","ART","Caución"]:["Hogar","Vida","Auto"];ofrecer=base.filter(r=>!tiene.includes(r)).slice(0,2)}
+    return {c,tiene,ofrecer,open};
+  }).filter(x=>x.ofrecer.length&&!x.open).sort((a,b)=>b.tiene.length-a.tiene.length||(b.c.necesidades||[]).length-(a.c.necesidades||[]).length);
+}
+function ramoBars(vig){
+  const m={};vig.forEach(p=>{const r=p.ramo||"Otro";m[r]=(m[r]||0)+(+p.premio||0)});
+  const arr=Object.entries(m).sort((a,b)=>b[1]-a[1]);const max=Math.max(1,...arr.map(a=>a[1]));
+  return '<section class="panel"><header><h2>Cartera por ramo</h2><span class="muted" style="font-size:12px">premio mensual vigente</span></header>'+(arr.length?'<div class="bars">'+arr.map(([r,v])=>'<div class="barrow"><span>'+esc(r)+'</span><div class="track"><div class="fill" style="width:'+(v/max*100).toFixed(1)+'%"></div></div><span class="mono">'+money(v)+'</span></div>').join("")+'</div>':'<div class="empty">Sin pólizas vigentes todavía.</div>')+'</section>';
+}
+function funnel(){
+  const cnt=ETAPAS.map(e=>[e,S.oportunidades.filter(o=>(o.etapa||"Contactado")===e).length]);const max=Math.max(1,...cnt.map(c=>c[1]));
+  const abiertas=S.oportunidades.filter(o=>!["Emitida","Perdida"].includes(o.etapa)).reduce((a,o)=>a+(+o.prima||0),0);
+  return '<section class="panel"><header><h2>Embudo de ventas</h2><span class="muted" style="font-size:12px">'+money(abiertas)+'/mes en juego</span><a class="go" href="#oportunidades">Ver todo</a></header><div class="bars">'+cnt.map(([e,n])=>'<div class="barrow"><span>'+e+'</span><div class="track"><div class="fill" style="width:'+(n/max*100).toFixed(1)+'%;background:'+(e==="Perdida"?"var(--bad)":e==="Emitida"?"var(--ok)":"var(--accent)")+'"></div></div><span class="mono">'+n+'</span></div>').join("")+'</div></section>';
+}
+
+// ---------- aumentos
+const MESES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+function mesActual(){return todayISO().slice(0,7)}
+function mesLabel(m){if(!m)return "—";const [y,mm]=m.split("-");return MESES[+mm-1]+" "+y.slice(2)}
+function prevMes(m){let [y,mm]=m.split("-").map(Number);mm--;if(!mm){mm=12;y--}return y+"-"+String(mm).padStart(2,"0")}
+function pctChip(p){if(p==null)return '<span class="chip">sin dato</span>';const cls=p>=15?"bad":p>=5?"warn":p<0?"ok":"";return '<span class="chip '+cls+'">'+(p>0?"+":"")+p.toFixed(1).replace(".",",")+'%</span>'}
+// cuota por póliza y mes (mes = mes de vencimiento de la cuota)
+function cuotasPorMes(pid){const m={};S.cobranzas.filter(c=>c.polizaId===pid&&c.vencimiento&&+c.importe>0).forEach(c=>{const k=c.vencimiento.slice(0,7);m[k]=(m[k]||0)+(+c.importe||0)});return m}
+function subas(){
+  return S.polizas.map(p=>{const m=cuotasPorMes(p.id);const ks=Object.keys(m).sort();if(!ks.length)return null;
+    const mes=ks[ks.length-1],last=m[mes],prevK=ks.length>1?ks[ks.length-2]:null,prev=prevK?m[prevK]:null;
+    const k6=ks.find(k=>k>=sixAgo(mes))||ks[0],base6=m[k6];
+    return {p,mes,last,prev,prevK,pct:prev?((last-prev)/prev*100):null,acum:(base6&&k6!==mes)?((last-base6)/base6*100):null,desde:k6,serie:ks.map(k=>[k,m[k]])};
+  }).filter(Boolean).sort((a,b)=>(b.pct??-999)-(a.pct??-999));
+}
+function sixAgo(m){let k=m;for(let i=0;i<6;i++)k=prevMes(k);return k}
+function evoMensual(n){
+  const tot={},cnt={};S.cobranzas.forEach(c=>{if(!c.vencimiento||c.importe==null)return;const k=c.vencimiento.slice(0,7);tot[k]=(tot[k]||0)+(+c.importe||0);cnt[k]=(cnt[k]||0)+1});
+  let k=mesActual();const out=[];for(let i=0;i<n;i++){out.unshift(k);k=prevMes(k)}
+  return out.map((m,i)=>{const prev=tot[prevMes(m)];return {m,v:tot[m]||0,n:cnt[m]||0,pct:prev&&tot[m]?((tot[m]-prev)/prev*100):null}});
+}
+function evoBox(n){
+  const ev=evoMensual(n);const max=Math.max(1,...ev.map(e=>e.v));
+  return '<section class="panel"><header><h2>Facturación mensual de la cartera</h2><span class="muted" style="font-size:12px">suma de cuotas por mes</span><a class="go" href="#aumentos">Ver todo</a></header>'+
+   (ev.some(e=>e.v)?'<div class="bars">'+ev.map(e=>'<div class="barrow"><span>'+mesLabel(e.m)+'</span><div class="track"><div class="fill" style="width:'+(e.v/max*100).toFixed(1)+'%"></div></div><span class="mono">'+money(e.v)+' '+(e.pct!=null?pctChip(e.pct):'')+'</span></div>').join("")+'</div>':'<div class="empty">Cuando cargues cuotas en Cobranzas, acá vas a ver cómo evoluciona mes a mes.</div>')+'</section>';
+}
+function aumentos(){
+  const sb=subas();const q=filt.q.trim().toLowerCase();
+  const rows=sb.filter(x=>!q||(cliName(x.p.clienteId)+" "+(x.p.ramo||"")+" "+(x.p.compania||"")).toLowerCase().includes(q));
+  const conDato=sb.filter(x=>x.pct!=null&&x.mes===mesActual());
+  const prom=conDato.length?conDato.reduce((a,x)=>a+x.pct,0)/conDato.length:null;
+  const ev=evoMensual(12);const cur=ev[ev.length-1];
+  const byComp={};conDato.forEach(x=>{const k=x.p.compania||"Sin compañía";(byComp[k]=byComp[k]||[]).push(x.pct)});
+  let h='<div class="toolbar"><h1>Aumentos mes a mes</h1><input type="search" id="q" placeholder="Buscar cliente, ramo o compañía…" aria-label="Buscar" value="'+esc(filt.q)+'"></div>';
+  h+='<div class="kpis">'+kpi("Facturado "+mesLabel(cur.m),money(cur.v),cur.n+" cuotas")+
+    kpi("Variación vs. "+mesLabel(prevMes(cur.m)),cur.pct!=null?(cur.pct>0?"+":"")+cur.pct.toFixed(1).replace(".",",")+"%":"—","total de la cartera")+
+    kpi("Aumento promedio por póliza",prom!=null?(prom>0?"+":"")+prom.toFixed(1).replace(".",",")+"%":"—",conDato.length+" pólizas con dato este mes")+
+    kpi("Subieron 10% o más",conDato.filter(x=>x.pct>=10).length,"este mes",conDato.some(x=>x.pct>=10))+'</div>';
+  h+='<div class="grid2">'+evoBox(12)+'<section class="panel"><header><h2>Aumento promedio por compañía</h2><span class="muted" style="font-size:12px">'+mesLabel(mesActual())+'</span></header>'+
+    (Object.keys(byComp).length?'<ul class="rows">'+Object.entries(byComp).map(([k,a])=>[k,a.reduce((s,x)=>s+x,0)/a.length,a.length]).sort((a,b)=>b[1]-a[1]).map(([k,p,n])=>li(esc(k)+' '+pctChip(p),n+" póliza"+(n===1?"":"s"))).join("")+'</ul>':'<div class="empty">Sin cuotas de este mes y del anterior para comparar.</div>')+'</section></div>';
+  if(!rows.length)return h+'<div class="panel"><div class="empty">Para comparar, cargá en Cobranzas al menos dos cuotas de una misma póliza en meses distintos.</div></div>';
+  h+='<div class="tablewrap"><table><thead><tr><th>Cliente</th><th>Ramo · compañía</th><th>Último mes</th><th class="num">Cuota anterior</th><th class="num">Cuota actual</th><th class="num">Diferencia</th><th>Mes a mes</th><th>Últimos 6 meses</th></tr></thead><tbody>'+
+   rows.map(x=>'<tr data-act="edit" data-col="polizas" data-id="'+esc(x.p.id)+'" tabindex="0"><td>'+esc(cliName(x.p.clienteId))+'</td><td>'+esc([x.p.ramo,x.p.compania].filter(Boolean).join(" · "))+'</td><td>'+mesLabel(x.mes)+'</td><td class="num">'+(x.prev!=null?money(x.prev):"—")+'</td><td class="num">'+money(x.last)+'</td><td class="num">'+(x.prev!=null?(x.last-x.prev>0?"+":"")+money(x.last-x.prev):"—")+'</td><td>'+pctChip(x.pct)+'</td><td>'+(x.acum!=null?pctChip(x.acum)+' <span class="muted" style="font-size:12px">desde '+mesLabel(x.desde)+'</span>':'—')+'</td></tr>').join("")+'</tbody></table></div>';
+  h+='<div class="muted">Se calcula con las cuotas cargadas en Cobranzas, tomando el mes de vencimiento de cada cuota.</div>';
+  return h;
+}
+
+// ---------- lists
+const LIST={
+ clientes:{h:["Cuenta","Cliente","Teléfono","Pólizas vigentes","Premio/mes","Último contacto","Responsable"],filter:["Todos","Sin contacto 60+ días","Sin pólizas vigentes","Con necesidades detectadas"],
+  test:(c,f)=>f==="Sin contacto 60+ días"?(!c.ultimoContacto||days(c.ultimoContacto)<=-60):f==="Sin pólizas vigentes"?!ramosDe(c.id).length:f==="Con necesidades detectadas"?(c.necesidades||[]).length>0:true,
+  sort:(a,b)=>(a.nombre||"").localeCompare(b.nombre||""),
+  row:c=>{const r=ramosDe(c.id),pr=S.polizas.filter(p=>p.clienteId===c.id&&vigente(p)).reduce((a,p)=>a+(+p.premio||0),0);return ['<span class="mono">'+esc(c.nroCuenta||"—")+'</span>',esc(c.nombre)+(c.tipo&&c.tipo!=="Persona"?' <span class="chip">'+esc(c.tipo)+'</span>':''),esc(c.telefono||"—"),esc(r.join(", ")||"—"),{n:money(pr)},fdate(c.ultimoContacto),esc(c.responsable||"—")]}},
+ polizas:{h:["Cliente","Ramo","Compañía","Cobertura","Estado","Vence","Renovación","Premio/mes"],filter:["Todas","Vigentes","En emisión","Vencen en 45 días","Emitidas sin enviar","Anuladas"],
+  test:(p,f)=>f==="Vigentes"?vigente(p):f==="En emisión"?["Solicitada","En emisión","Observada"].includes(p.estado||"Solicitada"):f==="Vencen en 45 días"?(p.vigHasta&&days(p.vigHasta)>=0&&days(p.vigHasta)<=45):f==="Emitidas sin enviar"?(p.estado==="Emitida"&&!p.enviada):f==="Anuladas"?p.estado==="Anulada":true,
+  sort:(a,b)=>(a.vigHasta||"9").localeCompare(b.vigHasta||"9"),
+  row:p=>{const st=p.estado||"Solicitada";const d=days(p.vigHasta);return [esc(cliName(p.clienteId))+((p.archivos||[]).length?' <span class="chip" title="Archivos adjuntos">📎 '+p.archivos.length+'</span>':''),esc(p.ramo||"—"),esc(p.compania||"—"),esc(p.cobertura||"—"),'<span class="chip '+(st==="Emitida"?"ok":st==="Anulada"||st==="Observada"?"bad":"warn")+'">'+esc(st)+'</span>',fdate(p.vigHasta)+(d!=null&&d>=0&&d<=45?' <span class="chip warn">'+d+' d</span>':''),esc(p.renovacion||"—"),{n:money(p.premio)}]}},
+ cobranzas:{h:["Cliente","Póliza","Vencimiento","Importe","Estado",""],filter:["Pendientes","Atrasadas","Vencen esta semana","Avisadas","Pagadas","Todas"],
+  test:(c,f)=>f==="Pendientes"?c.estado!=="Pagada":f==="Atrasadas"?cobVencida(c):f==="Vencen esta semana"?(c.estado!=="Pagada"&&c.vencimiento&&days(c.vencimiento)>=0&&days(c.vencimiento)<=7):f==="Avisadas"?c.estado==="Avisado":f==="Pagadas"?c.estado==="Pagada":true,
+  sort:(a,b)=>{const pa=a.estado==="Pagada",pb=b.estado==="Pagada";if(pa!==pb)return pa?1:-1;return pa?(b.vencimiento||"").localeCompare(a.vencimiento||""):(a.vencimiento||"9").localeCompare(b.vencimiento||"9")},
+  row:c=>{const p=byId("polizas",c.polizaId)||{};const cl=byId("clientes",p.clienteId)||{};const v=cobVencida(c);const d=days(c.vencimiento);const ult=+c.importe>0?0:ultImporte(c.polizaId);
+    const st=c.estado==="Pagada"?'<span class="chip ok">Pagada'+(c.fechaPago?" "+fdate(c.fechaPago):"")+'</span>':v?'<span class="chip bad">Atrasada · '+(-d)+' d</span>'+(c.estado==="Avisado"?' <span class="chip">avisado</span>':''):'<span class="chip '+(c.estado==="Avisado"?"acc":"warn")+'">'+esc(c.estado||"A cobrar")+'</span>'+(d===0?' <span class="chip warn">hoy</span>':d>0&&d<=3?' <span class="chip warn">en '+d+' d</span>':'');
+    const msg="Hola "+first(cl.pila||cl.nombre)+"! Te escribo de LP Seguros. "+(v?"Figura impaga la cuota de "+(c.periodo||"este mes")+" de tu seguro":"Te paso el cupón de tu seguro")+(p.ramo&&p.ramo!=="Otro"?" de "+p.ramo.toLowerCase():"")+(p.bien?" ("+p.bien+")":"")+(p.compania?" en "+p.compania:"")+impTxt(c)+(v?", vencida el "+fdate(c.vencimiento)+". Para no perder la cobertura, ¿me avisás cuando la abones?":", vence el "+fdate(c.vencimiento)+". Cualquier cosa me escribís.");
+    const acts=c.estado==="Pagada"?"":'<span class="acts" data-act="noop">'+waBtn(cl.telefono,msg)+(c.estado!=="Avisado"?'<button type="button" class="sm" data-act="avisado" data-id="'+esc(c.id)+'">Avisado</button>':'')+'<button type="button" class="sm" data-act="paid" data-id="'+esc(c.id)+'">Pagada</button></span>';
+    return [esc(cliName(p.clienteId))+'<div class="muted" style="font-size:12px">'+esc([p.compania,p.bien||p.ramo].filter(Boolean).join(" · "))+'</div>',esc(p.ramo||"—"),fdate(c.vencimiento),{n:(+c.importe>0?money(c.importe):'<span class="muted">a cargar</span>'+(ult?'<div class="muted" style="font-size:11.5px">últ. '+money(ult)+'</div>':''))},st,acts]}},
+ siniestros:{h:["Cliente","Tipo","Fecha","Póliza","Estado","Documentación","Próximo paso"],filter:["Abiertos","Todos","Falta documentación","Cerrados"],
+  test:(x,f)=>{const ab=!["Pagado","Rechazado","Cerrado"].includes(x.estado);return f==="Abiertos"||!f?ab:f==="Falta documentación"?ab&&docsFalta(x,"siniestros").length>0:f==="Cerrados"?!ab:true},
+  sort:(a,b)=>(b.fecha||"").localeCompare(a.fecha||""),
+  row:x=>{const p=byId("polizas",x.polizaId)||{};const falt=docsFalta(x,"siniestros").length;const tot=docList({map:"stro"},x.tipo).length;const st=x.estado||"Denunciado";
+    return [esc(cliName(x.clienteId)),esc(x.tipo||"—"),fdate(x.fecha),esc([p.ramo,p.compania].filter(Boolean).join(" · ")||"—"),'<span class="chip '+(st==="Pagado"||st==="Cerrado"?"ok":st==="Rechazado"||st==="Falta documentación"?"bad":"warn")+'">'+esc(st)+'</span>',tot?(falt?'<span class="chip warn">faltan '+falt+' de '+tot+'</span>':'<span class="chip ok">completa</span>'):"—",esc(x.proximoPaso||"—")+(x.fechaProximo?" · "+fdate(x.fechaProximo):"")]}},
+ oportunidades:{h:["Cliente / prospecto","Ramo","Etapa","Próximo paso","Fecha","Prima/mes","Responsable"],filter:["Abiertas","Todas","Emitidas","Perdidas"],
+  test:(o,f)=>f==="Abiertas"||!f?!["Emitida","Perdida"].includes(o.etapa):f==="Emitidas"?o.etapa==="Emitida":f==="Perdidas"?o.etapa==="Perdida":true,
+  sort:(a,b)=>(a.fechaProximo||"9").localeCompare(b.fechaProximo||"9"),
+  row:o=>{const e=o.etapa||"Contactado";const d=days(o.fechaProximo);return [esc(o.prospecto||cliName(o.clienteId)),esc((o.ramos||[]).join(", ")||"—"),'<span class="chip '+(e==="Emitida"?"ok":e==="Perdida"?"bad":"acc")+'">'+esc(e)+'</span>',esc(o.proximoPaso||"—"),fdate(o.fechaProximo)+(d!=null&&d<=0&&!["Emitida","Perdida"].includes(e)?' <span class="chip warn">hoy</span>':''),{n:money(o.prima)},esc(o.responsable||"—")]}}
+};
+function searchText(col,x){if(col==="siniestros")return Object.values(x).filter(v=>typeof v==="string").join(" ")+" "+cliName(x.clienteId);const base=Object.values(x).filter(v=>typeof v==="string"||typeof v==="number").join(" ");if(col==="polizas"||col==="oportunidades")return base+" "+cliName(x.clienteId);if(col==="cobranzas"){const p=byId("polizas",x.polizaId)||{};return base+" "+cliName(p.clienteId)+" "+(p.ramo||"")}return base}
+function list(col){
+  const L=LIST[col];const f=filt.f||L.filter[0];const q=filt.q.trim().toLowerCase();
+  const rows=S[col].filter(x=>L.test(x,f)).filter(x=>!q||searchText(col,x).toLowerCase().includes(q)).sort(L.sort);
+  const titles={clientes:"Clientes",polizas:"Pólizas",cobranzas:"Cobranzas",oportunidades:"Oportunidades",siniestros:"Siniestros"};
+  let h='<div class="toolbar"><h1>'+titles[col]+'</h1><input type="search" id="q" placeholder="Buscar…" aria-label="Buscar" value="'+esc(filt.q)+'"><select id="f" aria-label="Filtro">'+L.filter.map(o=>'<option'+(o===f?" selected":"")+'>'+o+'</option>').join("")+'</select><button type="button" class="sm" data-act="impopen" '+(col==="clientes"?"":"hidden")+'>Importar teléfonos</button><button type="button" class="primary" data-act="new" data-col="'+col+'">+ '+(col==="siniestros"?"Nuevo":"Nueva")+' '+SCHEMA[col].one+'</button></div>';
+  if(!rows.length)return h+'<div class="panel"><div class="empty">'+(S[col].length?"Ningún resultado con ese filtro.":"Todavía no hay "+titles[col].toLowerCase()+" cargadas. Usá el botón de arriba para crear la primera.")+'</div></div>';
+  h+='<div class="tablewrap"><table><thead><tr>'+L.h.map((t,i)=>'<th'+(/Premio|Importe|Prima/.test(t)?' class="num"':'')+'>'+t+'</th>').join("")+'</tr></thead><tbody>'+
+   rows.map(x=>'<tr data-act="'+(col==="clientes"?"open":"edit")+'" data-col="'+col+'" data-id="'+esc(x.id)+'" tabindex="0">'+L.row(x).map(c=>typeof c==="object"?'<td class="num">'+c.n+'</td>':'<td>'+c+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>';
+  if(col==="cobranzas"){const mk=mesAGenerar(),falt=cuotasFaltantes(mk).length,nm=MESES_L[+mk.slice(5)-1];
+    h=h.replace('<div class="tablewrap">','<div class="notice"><span>'+(falt?'Hay <b>'+falt+'</b> pólizas con día de cuota sin la cuota de '+nm+' cargada.':'Las cuotas de '+nm+' ya están generadas.')+' Se crean sin importe: el monto lo cargás cuando llega el cupón o al marcarla pagada.</span>'+(falt?'<button type="button" class="sm primary" data-act="gencuotas" data-x="'+mk+'">Generar cuotas de '+nm+'</button>':'')+'</div><div class="tablewrap">');
+    const tot=rows.filter(c=>c.estado!=="Pagada").reduce((a,c)=>a+(+c.importe||0),0);h+='<div class="muted">Pendiente de cobro en esta lista: <span class="mono">'+money(tot)+'</span></div>'}
+  return h;
+}
+
+// ---------- form dialog
+let cur=null;
+function openForm(col,id,preset){
+  const sc=SCHEMA[col];const x=id?byId(col,id):Object.assign({},preset||{});if(id&&!x)return;
+  cur={col,id};
+  $("#dTitle").textContent=id?sc.title(x):(col==="siniestros"||col==="clientes"?"Nuevo ":"Nueva ")+sc.one;
+  $("#dDel").hidden=!id;$("#dKit").hidden=!(id&&col==="polizas");$("#dKit").onclick=()=>{$("#dlg").close();location.hash="kit-"+id};$("#dDel").classList.remove("armed");$("#dDel").textContent="Eliminar";
+  let h=sc.fields.map(f=>field(f,x[f.k])).join("");
+  h+='<datalist id="companias">'+COMPANIAS.map(c=>'<option value="'+esc(c)+'">').join("")+'</datalist>';
+  if(id&&col==="clientes"){
+    const ps=S.polizas.filter(p=>p.clienteId===id),os=S.oportunidades.filter(o=>o.clienteId===id);
+    h+='<div class="related"><div class="toolbar"><h2>Pólizas ('+ps.length+')</h2><button type="button" class="sm" data-act="newrel" data-col="polizas" data-id="'+esc(id)+'">+ Póliza</button><button type="button" class="sm" data-act="newrel" data-col="oportunidades" data-id="'+esc(id)+'">+ Oportunidad</button></div>'+
+      (ps.length||os.length?'<ul class="rows">'+ps.map(p=>li(esc(p.ramo||"Póliza")+' <span class="chip '+(vigente(p)?"ok":"")+'">'+esc(p.estado||"Solicitada")+'</span>',esc([p.compania,p.bien].filter(Boolean).join(" · "))+" · vence "+fdate(p.vigHasta)+" · "+money(p.premio),btn("Abrir","edit","polizas",p.id))).join("")+os.map(o=>li("Oportunidad: "+esc((o.ramos||[]).join(", "))+' <span class="chip acc">'+esc(o.etapa||"Contactado")+'</span>',esc(o.proximoPaso||""),btn("Abrir","edit","oportunidades",o.id))).join("")+'</ul>':'<div class="muted">Sin pólizas ni oportunidades.</div>')+'</div>';
+  }
+  if(id&&col==="polizas"){
+    const cs=S.cobranzas.filter(c=>c.polizaId===id).sort((a,b)=>(b.vencimiento||"").localeCompare(a.vencimiento||""));
+    h+='<div class="related"><div class="toolbar"><h2>Cuotas ('+cs.length+')</h2><button type="button" class="sm" data-act="newrel" data-col="cobranzas" data-id="'+esc(id)+'">+ Cuota</button></div>'+(cs.length?'<ul class="rows">'+cs.slice(0,12).map((c,i)=>{const nx=cs[i+1];const pc=nx&&+nx.importe?((+c.importe-+nx.importe)/+nx.importe*100):null;return li("Cuota "+esc(c.periodo||"")+' <span class="chip '+(c.estado==="Pagada"?"ok":cobVencida(c)?"bad":"warn")+'">'+(cobVencida(c)?"Vencida":esc(c.estado||"A cobrar"))+'</span>'+(pc!=null?' '+pctChip(pc):''),"vence "+fdate(c.vencimiento)+" · "+impShow(c),btn("Abrir","edit","cobranzas",c.id))}).join("")+'</ul>':'<div class="muted">Sin cuotas cargadas.</div>')+'</div>';
+  }
+  $("#dBody").innerHTML=h;
+  cur.files=(x.archivos||[]).slice();if(sc.fields.some(f=>f.t==="files"))renderFiles();
+  sc.fields.filter(f=>f.t==="checklist").forEach(f=>renderChecklist(f,x[f.k]));
+  if(id){const fl=sc.fields.find(f=>f.t==="checklist");if(fl){const falt=docsFalta(x,col);const c=byId("clientes",x.clienteId)||{};if(falt.length&&waNum(c.telefono)){const box=$("#ck_"+fl.k);box.insertAdjacentHTML("afterend",'<div style="margin-top:6px">'+waBtn(c.telefono,docsMsg(c.pila||c.nombre,col==="polizas"?"tu seguro de "+(x.ramo||"").toLowerCase():"tu siniestro"+(x.tipo?" ("+x.tipo.toLowerCase()+")":""),falt)).replace("WhatsApp","Pedir lo que falta por WhatsApp")+'</div>')}}}
+  const d=$("#dlg");if(!d.open)d.showModal();
+  const firstIn=$("#dBody input,#dBody select");if(firstIn&&!id)firstIn.focus();
+}
+function field(f,v){
+  const id="f_"+f.k,cls="fld"+(f.full?" full":""),lab='<label for="'+id+'">'+f.l+(f.req?" *":"")+'</label>';
+  if(f.t==="select")return '<div class="'+cls+'">'+lab+'<select id="'+id+'"><option value="">—</option>'+f.o.map(o=>'<option'+(o===v?" selected":"")+'>'+esc(o)+'</option>').join("")+'</select></div>';
+  if(f.t==="ref"){const opts=S[f.ref].slice().sort((a,b)=>(f.ref==="clientes"?(a.nombre||"").localeCompare(b.nombre||""):polName(a.id).localeCompare(polName(b.id))));
+    return '<div class="'+cls+'">'+lab+'<select id="'+id+'"><option value="">'+(f.req?"Elegí…":"—")+'</option>'+opts.map(o=>'<option value="'+esc(o.id)+'"'+(o.id===v?" selected":"")+'>'+esc(f.ref==="clientes"?o.nombre:polName(o.id)+(o.numero?" · Nº "+o.numero:""))+'</option>').join("")+'</select></div>'}
+  if(f.t==="multi")return '<div class="'+cls+'"><span class="lab">'+f.l+'</span><div class="checks">'+f.o.map((o,i)=>'<label><input type="checkbox" id="'+id+'_'+i+'" value="'+esc(o)+'"'+((v||[]).includes(o)?" checked":"")+'>'+esc(o)+'</label>').join("")+'</div></div>';
+  if(f.t==="check")return '<div class="'+cls+'"><div class="checks"><label><input type="checkbox" id="'+id+'"'+(v?" checked":"")+'>'+f.l+'</label></div></div>';
+  if(f.t==="checklist")return '<div class="'+cls+'"><span class="lab">'+f.l+'</span><div id="ck_'+f.k+'"></div></div>';
+  if(f.t==="files")return '<div class="'+cls+'"><span class="lab">'+f.l+'</span><div id="filesBox"></div></div>';
+  if(f.t==="textarea")return '<div class="'+cls+'">'+lab+'<textarea id="'+id+'" rows="3">'+esc(v)+'</textarea></div>';
+  return '<div class="'+cls+'">'+lab+'<input id="'+id+'" type="'+f.t+'"'+(f.t==="number"?' inputmode="decimal" step="any"':'')+(f.list?' list="'+f.list+'"':'')+' value="'+esc(v==null?"":v)+'"></div>';
+}
+function collect(){
+  const sc=SCHEMA[cur.col],old=cur.id?byId(cur.col,cur.id)||{}:{};const data=Object.assign({},old);delete data.id;
+  for(const f of sc.fields){const id="f_"+f.k;
+    if(f.t==="files"){data[f.k]=cur.files||[];continue}
+    if(f.t==="checklist"){data[f.k]=readChecklist(f.k);continue}
+    if(f.t==="multi")data[f.k]=f.o.filter((o,i)=>$("#"+id+"_"+i).checked);
+    else if(f.t==="check")data[f.k]=$("#"+id).checked;
+    else if(f.t==="number"){const s=$("#"+id).value.trim().replace(/\./g,"").replace(",",".");data[f.k]=s===""?null:+s}
+    else data[f.k]=$("#"+id).value.trim();
+    if(f.req&&(data[f.k]===""||data[f.k]==null)){toast("Completá: "+f.l);$("#"+id).focus();return null}
+  }
+  if(cur.col==="oportunidades"&&!data.clienteId&&!data.prospecto){toast("Elegí un cliente o escribí el nombre del prospecto");return null}
+  if(old.createdAt)data.createdAt=old.createdAt;
+  return data;
+}
+$("#frm").addEventListener("submit",async e=>{e.preventDefault();const data=collect();if(!data)return;const btnS=$("#dSave");btnS.disabled=true;
+  try{await save(cur.col,cur.id,data);$("#dlg").close();toast("Guardado")}catch(er){err(er)}finally{btnS.disabled=false}});
+$("#dClose").onclick=$("#dCancel").onclick=()=>$("#dlg").close();
+$("#dDel").onclick=async()=>{const b=$("#dDel");if(!b.classList.contains("armed")){b.classList.add("armed");b.textContent="Confirmar: eliminar";return}
+  try{await db.collection(cur.col).doc(cur.id).delete();$("#dlg").close();toast("Eliminado")}catch(er){err(er)}};
+
+// ---------- archivos
+function fileHref(a){return a.url||("/_blob/"+a.id)}
+function renderFiles(){const box=$("#filesBox");if(!box)return;
+  const fs=cur.files||[];
+  box.innerHTML=(fs.length?'<ul class="rows files">'+fs.map((a,i)=>'<li><div class="main"><a href="'+esc(fileHref(a))+'" target="_blank" rel="noopener">'+esc(a.name||"archivo")+'</a> <span class="muted" style="font-size:12px">'+(a.size?Math.round(a.size/1024)+" KB":"")+'</span></div><div class="acts"><button type="button" class="sm" data-act="rmfile" data-i="'+i+'">Quitar</button></div></li>').join("")+'</ul>':'<div class="muted" style="font-size:13px">Sin archivos adjuntos.</div>')+
+   (assets?'<label class="btn sm" style="width:max-content;margin-top:6px">Adjuntar PDF o foto<input type="file" id="fileIn" accept="application/pdf,image/*" multiple hidden></label> <span class="muted" style="font-size:12px">Se guarda al tocar Guardar.</span>':'<div class="muted" style="font-size:12px;margin-top:6px">Para adjuntar archivos necesitás permiso de edición sobre la página.</div>');
+}
+document.addEventListener("change",async e=>{if(e.target.id!=="fileIn"||!assets)return;const files=[...e.target.files];e.target.value="";
+  for(const f of files){if(f.size>20*1024*1024){toast(f.name+" supera 20 MB");continue}toast("Subiendo "+f.name+"…");
+    try{const r=await assets.upload(f);cur.files=(cur.files||[]).concat([{id:r.id,url:r.url,name:f.name,size:r.sizeBytes,type:r.contentType}]);renderFiles();toast("Adjuntado: "+f.name)}catch(er){console.error(er);toast(er&&er.code==="unsupported_type"?"Ese tipo de archivo no se puede subir. Usá PDF o imagen.":"No se pudo subir "+f.name)}}
+});
+
+// ---------- recordatorios
+function ar(n){return (n>0?"+":"")+n.toFixed(1).replace(".",",")+"%"}
+function reminders(){
+  const out=[];const hoy=todayISO(),mes=mesActual();
+  const done=new Set(S.recordatorios.map(r=>r.id));
+  const push=r=>{if(!done.has(r.key))out.push(r)};
+  S.polizas.forEach(p=>{if(p.estado!=="Emitida"||!p.vigHasta||CERR.includes(p.renovacion))return;const d=days(p.vigHasta);if(d<-120||d>10)return;const c=byId("clientes",p.clienteId)||{};
+    push({key:"renov-"+p.id+"-"+p.vigHasta,tipo:"Renovación",cls:d<=7?"bad":"warn",chip:d<0?"vencida":"en "+d+" d",orden:d,c,det:[p.ramo,p.compania,p.cobertura].filter(Boolean).join(" · ")+" · vence "+fdate(p.vigHasta),
+      msg:"Hola "+first(c.pila||c.nombre)+"! ¿Cómo estás? Te escribo de LP Seguros: tu póliza de "+(p.ramo||"seguro").toLowerCase()+(p.bien?" ("+p.bien+")":"")+(p.compania?" en "+p.compania:"")+" vence el "+fdate(p.vigHasta)+". Ya estoy revisando la renovación para que no te quedes sin cobertura. ¿Seguimos igual o querés que cotice alternativas?"})});
+  S.cobranzas.forEach(k=>{if(k.estado==="Pagada"||!k.vencimiento)return;const d=days(k.vencimiento);if(d>3||(d>=0&&k.estado==="Avisado"))return;const p=byId("polizas",k.polizaId)||{},c=byId("clientes",p.clienteId)||{};
+    push({key:"cuota-"+k.id+"-"+(d<0?"venc":"aviso"),tipo:d<0?"Cuota vencida":"Cuota por vencer",cls:d<0?"bad":"warn",chip:d<0?(-d)+" d atraso":d===0?"hoy":"en "+d+" d",orden:d-100,c,det:(p.ramo||"")+(p.compania?" · "+p.compania:"")+" · cuota "+(k.periodo||"")+" · "+money(k.importe),
+      msg:"Hola "+first(c.pila||c.nombre)+"! Te escribo de LP Seguros. "+(d<0?"Figura impaga":"El "+fdate(k.vencimiento)+" vence")+" la cuota "+(k.periodo||"")+" de tu seguro de "+(p.ramo||"").toLowerCase()+(p.compania?" ("+p.compania+")":"")+impTxt(k)+". Para no perder la cobertura, ¿me avisás cuando la abones? Cualquier cosa te paso los datos."})});
+  S.polizas.forEach(p=>{const dc=+p.diaCuota;if(!dc||!vigente(p))return;const t=new Date(hoy+"T12:00:00");let y=t.getFullYear(),m=t.getMonth();if(t.getDate()>dc){m++;if(m>11){m=0;y++}}
+    const dd=Math.min(dc,new Date(y,m+1,0).getDate());const venc=y+"-"+String(m+1).padStart(2,"0")+"-"+String(dd).padStart(2,"0");const d=days(venc);if(d>2)return;
+    if(S.cobranzas.some(k=>k.polizaId===p.id&&k.vencimiento&&k.vencimiento.slice(0,7)===venc.slice(0,7)))return;const c=byId("clientes",p.clienteId)||{};
+    push({key:"cupon-"+p.id+"-"+venc,tipo:"Cupón por vencer",cls:"warn",chip:d===0?"hoy":"en "+d+" d",orden:d-90,c,det:[p.ramo,p.compania,p.bien].filter(Boolean).join(" · ")+" · vence el "+dc+" de cada mes",
+      msg:"Hola "+first(c.pila||c.nombre)+"! Te escribo de LP Seguros para recordarte que "+(d===0?"hoy":"el "+fdate(venc))+" vence la cuota de tu seguro"+(p.ramo&&p.ramo!=="Otro"?" de "+p.ramo.toLowerCase():"")+(p.bien?" ("+p.bien+")":"")+(p.compania?" en "+p.compania:"")+". Si necesitás el cupón te lo paso por acá."})});
+  subas().filter(x=>x.mes===mes&&x.pct!=null&&x.pct>=5).forEach(x=>{const c=byId("clientes",x.p.clienteId)||{};
+    push({key:"suba-"+x.p.id+"-"+mes,tipo:"Aumento",cls:x.pct>=15?"bad":"warn",chip:ar(x.pct),orden:50-x.pct,c,det:[x.p.ramo,x.p.compania].filter(Boolean).join(" · ")+" · "+money(x.prev)+" → "+money(x.last),
+      msg:"Hola "+first(c.pila||c.nombre)+"! Te escribo de LP Seguros para avisarte que este mes la cuota de tu seguro de "+(x.p.ramo||"").toLowerCase()+" pasa de "+money(x.prev)+" a "+money(x.last)+" ("+ar(x.pct)+"), por la actualización de la compañía. Si querés, reviso alternativas para que no pagues de más."})});
+  S.clientes.forEach(c=>{if(!c.nacimiento||c.nacimiento.slice(5)!==hoy.slice(5))return;
+    push({key:"cumple-"+c.id+"-"+hoy.slice(0,4),tipo:"Cumpleaños",cls:"acc",chip:"hoy",orden:-50,c,det:"cumple años hoy",msg:"¡Feliz cumpleaños "+first(c.pila||c.nombre)+"! 🎉 Que tengas un gran día. Un abrazo de parte de LP Seguros."})});
+  S.oportunidades.forEach(o=>{if(["Emitida","Perdida"].includes(o.etapa)||!o.fechaProximo||days(o.fechaProximo)>0)return;const c=byId("clientes",o.clienteId)||{};const cc=Object.assign({},c,{telefono:o.telefono||c.telefono,nombre:o.prospecto||c.nombre});
+    push({key:"opp-"+o.id+"-"+o.fechaProximo,tipo:"Seguimiento venta",cls:"acc",chip:o.etapa||"Contactado",orden:10,c:cc,det:((o.ramos||[]).join(", "))+" · "+(o.proximoPaso||""),
+      msg:"Hola "+first(cc.pila||cc.nombre)+"! Te escribo de LP Seguros por la cotización de "+((o.ramos||[])[0]||"tu seguro").toLowerCase()+". ¿Pudiste verla? Cualquier duda te la respondo."})});
+  return out.sort((a,b)=>a.orden-b.orden);
+}
+function recordatorios(){
+  const rs=reminders();const tipos=["Todos",...new Set(rs.map(r=>r.tipo))];const f=tipos.includes(filt.f)?filt.f:"Todos";const rows=rs.filter(r=>f==="Todos"||r.tipo===f);
+  const sinTel=rs.filter(r=>!waNum(r.c.telefono)).length;
+  let h='<div class="toolbar"><h1>Recordatorios de hoy</h1><select id="f" aria-label="Tipo">'+tipos.map(t=>'<option'+(t===f?" selected":"")+'>'+esc(t)+'</option>').join("")+'</select></div>';
+  h+='<div class="muted" style="font-size:13.5px;max-width:75ch">Se arman solos con las renovaciones, cupones del mes, cuotas, aumentos, cumpleaños y seguimientos. Tocá <b>WhatsApp</b> para abrir el chat con el mensaje listo y después <b>Hecho</b> para sacarlo de la lista.'+(sinTel?' Hay '+sinTel+' sin teléfono cargado.':'')+'</div>';
+  if(!rows.length)return h+'<div class="panel"><div class="empty">No hay recordatorios pendientes.</div></div>';
+  h+='<section class="panel"><ul class="rows">'+rows.map(r=>li(esc(r.c.nombre||"Sin nombre")+' <span class="chip">'+esc(r.tipo)+'</span> <span class="chip '+r.cls+'">'+esc(r.chip)+'</span>',esc(r.det)+'<div style="margin-top:4px;color:var(--ink-3);font-size:12.5px;max-width:80ch">“'+esc(r.msg)+'”</div>',
+     (waNum(r.c.telefono)?waBtn(r.c.telefono,r.msg):'<span class="chip warn">sin teléfono</span>')+'<button type="button" class="sm" data-act="copy" data-msg="'+esc(r.msg)+'">Copiar</button><button type="button" class="sm" data-act="done" data-id="'+esc(r.key)+'" data-x="'+esc(r.tipo)+'">Hecho</button>')).join("")+'</ul></section>';
+  return h;
+}
+
+// ---------- cuenta del cliente
+let acc={id:null,sel:new Set(),draft:null};
+function nextNro(){return Math.max(1000,...S.clientes.map(c=>+c.nroCuenta||0))+1}
+function nroTxt(c){return c&&c.nroCuenta?"Cuenta Nº "+c.nroCuenta:"Cuenta sin número"}
+function accItems(c){
+  const items=[];
+  S.polizas.filter(p=>p.clienteId===c.id&&p.estado!=="Anulada").forEach(p=>{
+    const name=(p.ramo||"Póliza")+(p.compania?" · "+p.compania:"");
+    items.push({k:"res-"+p.id,pid:p.id,label:"Datos de la póliza",txt:"📄 *"+(p.ramo||"Póliza")+"*"+(p.compania?" – "+p.compania:"")+(p.numero?"\nNº de póliza: "+p.numero:"")+(p.bien?"\nBien asegurado: "+p.bien:"")+(p.cobertura?"\nCobertura: "+p.cobertura:"")+(p.vigDesde&&p.vigHasta?"\nVigencia: "+fdate(p.vigDesde)+" al "+fdate(p.vigHasta):p.vigHasta?"\nVence: "+fdate(p.vigHasta):"")+(p.premio?"\nCuota mensual: "+money(p.premio):"")});
+    S.cobranzas.filter(k=>k.polizaId===p.id&&k.estado!=="Pagada"&&k.vencimiento).sort((a,b)=>a.vencimiento.localeCompare(b.vencimiento)).forEach(k=>{const d=days(k.vencimiento);
+      items.push({k:"cuo-"+k.id,pid:p.id,label:(d<0?"Cuota vencida ":"Cuota a pagar ")+(k.periodo||"")+" · "+impShow(k),warn:d<0,txt:"💳 "+name+": la cuota "+(k.periodo||"")+(+k.importe>0?" de "+money(k.importe):"")+(d<0?" figura impaga desde el "+fdate(k.vencimiento)+". Para no perder la cobertura, ¿me avisás cuando la abones?":" vence el "+fdate(k.vencimiento)+".")})});
+    if(p.estado==="Emitida"&&p.vigHasta&&days(p.vigHasta)<=45&&days(p.vigHasta)>=-120&&!CERR.includes(p.renovacion))
+      items.push({k:"ren-"+p.id,pid:p.id,label:"Aviso de renovación · vence "+fdate(p.vigHasta),warn:true,txt:"🔁 "+name+": vence el "+fdate(p.vigHasta)+". Ya estoy revisando la renovación para que no te quedes sin cobertura. ¿Seguimos igual o querés que cotice alternativas?"});
+    const sb=subas().find(x=>x.p.id===p.id&&x.mes===mesActual()&&x.pct!=null&&x.pct>0);
+    if(sb)items.push({k:"sub-"+p.id,pid:p.id,label:"Aviso de aumento "+ar(sb.pct),txt:"📈 "+name+": este mes la cuota pasa de "+money(sb.prev)+" a "+money(sb.last)+" ("+ar(sb.pct)+") por la actualización de la compañía. Si querés, reviso alternativas."});
+  });
+  S.polizas.filter(p=>p.clienteId===c.id&&["Solicitada","En emisión","Observada"].includes(p.estado||"Solicitada")).forEach(p=>{const f=docsFalta(p,"polizas");if(f.length)items.push({k:"doc-"+p.id,pid:p.id,label:"Pedir documentación para emitir ("+f.length+")",warn:true,txt:"📋 Para emitir tu seguro de "+(p.ramo||"").toLowerCase()+" me falta:\n"+f.map(i=>"• "+i).join("\n")})});
+  S.siniestros.filter(x=>x.clienteId===c.id&&!["Pagado","Rechazado","Cerrado"].includes(x.estado)).forEach(x=>{const f=docsFalta(x,"siniestros");
+    items.push({k:"stro-"+x.id,pid:x.polizaId,label:"Estado del siniestro: "+(x.estado||"Denunciado"),txt:"🚗 Tu siniestro"+(x.tipo?" ("+x.tipo.toLowerCase()+")":"")+" del "+fdate(x.fecha)+(x.numero?", Nº "+x.numero:"")+", está en estado: *"+(x.estado||"Denunciado")+"*."+(x.proximoPaso?" Próximo paso: "+x.proximoPaso+".":"")});
+    if(f.length)items.push({k:"sdoc-"+x.id,pid:x.polizaId,label:"Pedir documentación del siniestro ("+f.length+")",warn:true,txt:"📋 Para avanzar con tu siniestro"+(x.tipo?" ("+x.tipo.toLowerCase()+")":"")+" me falta:\n"+f.map(i=>"• "+i).join("\n")})});
+  return items;
+}
+function buildMsg(c,items){const sel=items.filter(i=>acc.sel.has(i.k));if(!sel.length)return "";
+  return "Hola "+first(c.pila||c.nombre)+"! Te escribo de LP Seguros"+(c.nroCuenta?" (tu cuenta Nº "+c.nroCuenta+")":"")+".\n\n"+sel.map(i=>i.txt).join("\n\n")+"\n\nCualquier duda estoy a disposición. ¡Saludos!"}
+function cuenta(id){
+  const c=byId("clientes",id);if(!c)return '<div class="panel"><div class="empty">No encontré esa cuenta. <a href="#clientes">Volver a clientes</a></div></div>';
+  if(acc.id!==id){acc={id,sel:new Set(),draft:null}}
+  const pols=S.polizas.filter(p=>p.clienteId===id).sort((a,b)=>(vigente(b)?1:0)-(vigente(a)?1:0));
+  const items=accItems(c);const vig=pols.filter(vigente);const premio=vig.reduce((a,p)=>a+(+p.premio||0),0);
+  const deuda=S.cobranzas.filter(k=>cobVencida(k)&&pols.some(p=>p.id===k.polizaId)).reduce((a,k)=>a+(+k.importe||0),0);
+  const opps=S.oportunidades.filter(o=>o.clienteId===id);
+  let h='<div><a href="#clientes" class="muted" style="font-size:13px;text-decoration:none">← Clientes</a></div>';
+  h+='<div class="toolbar"><div style="margin-right:auto;min-width:0"><div class="muted mono" style="font-size:12.5px;letter-spacing:.04em">'+esc(nroTxt(c).toUpperCase())+'</div><h1>'+esc(c.nombre)+'</h1><div class="muted" style="font-size:13px">'+esc([c.tipo,c.dni,c.localidad].filter(Boolean).join(" · "))+'</div></div>'+
+    btn("Editar datos","edit","clientes",id)+btn("+ Póliza","newrel","polizas",id)+btn("+ Oportunidad","newrel","oportunidades",id)+'</div>';
+  h+='<div class="kpis">'+kpi("Pólizas vigentes",vig.length,pols.length+" en total")+kpi("Paga por mes",money(premio),"pólizas vigentes")+kpi("Deuda vencida",money(deuda),deuda?"tiene cuotas impagas":"al día",deuda>0)+
+    kpi("Contacto",esc(c.telefono||"—"),[c.telefono2,c.email].filter(Boolean).join(" · ")||"último contacto "+fdate(c.ultimoContacto))+'</div>';
+  h+='<div class="grid2 acc">';
+  // pólizas
+  h+='<section class="panel"><header><h2>Pólizas</h2><span class="count">'+pols.length+'</span></header>'+(pols.length?'<ul class="rows">'+pols.map(p=>{const st=p.estado||"Solicitada";const fs=p.archivos||[];
+    return '<li><div class="main"><div class="t">'+esc(p.ramo||"Póliza")+(p.compania?' · '+esc(p.compania):'')+' <span class="chip '+(vigente(p)?"ok":st==="Anulada"||st==="Observada"?"bad":"warn")+'">'+(vigente(p)?"Vigente":esc(st))+'</span></div>'+
+      '<div class="d">'+esc([p.cobertura,p.bien].filter(Boolean).join(" · ")||"Sin cobertura cargada")+'</div><div class="d">'+(p.numero?"Nº "+esc(p.numero)+" · ":"")+"vigencia "+fdate(p.vigDesde)+" al "+fdate(p.vigHasta)+" · <span class=mono>"+money(p.premio)+"</span>/mes</div>"+
+      (fs.length?'<div class="d" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">'+fs.map(a=>'<a href="'+esc(fileHref(a))+'" target="_blank" rel="noopener">📎 '+esc(a.name||"archivo")+'</a>').join("")+'</div>':'')+
+      '</div><div class="acts">'+btn("Abrir","edit","polizas",p.id)+'</div></li>'}).join("")+'</ul>':'<div class="empty">Todavía no tiene pólizas. Cargá la primera con <b>+ Póliza</b>.</div>')+'</section>';
+  // composer
+  const msg=acc.draft!=null?acc.draft:buildMsg(c,items);
+  h+='<section class="panel"><header><h2>Mandar al cliente</h2><span class="muted" style="font-size:12px">elegí qué incluir</span></header>'+
+    (items.length?'<div style="padding:12px 16px;display:grid;gap:8px">'+items.map(i=>'<label style="display:flex;gap:8px;align-items:flex-start;font-size:13.5px"><input type="checkbox" style="width:auto;margin-top:3px" data-sel="'+esc(i.k)+'"'+(acc.sel.has(i.k)?" checked":"")+'><span><b>'+esc((byId("polizas",i.pid)||{}).ramo||(i.k.startsWith("s")?"Siniestro":""))+'</b> · '+esc(i.label)+(i.warn?' <span class="chip warn">pendiente</span>':'')+'</span></label>').join("")+'</div>':'<div class="empty">No hay nada para mandar todavía.</div>')+
+    '<div style="padding:0 16px 16px;display:grid;gap:8px"><label class="lab" for="msgTxt" style="font-size:12px;font-weight:600;color:var(--ink-2)">Mensaje (lo podés editar)</label><textarea id="msgTxt" rows="9" placeholder="Marcá arriba lo que querés mandar y el mensaje se arma solo.">'+esc(msg)+'</textarea>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+(waNum(c.telefono)?'<a class="btn primary" id="accWa" target="_blank" rel="noopener" href="https://wa.me/'+waNum(c.telefono)+'?text='+encodeURIComponent(msg)+'">Abrir en WhatsApp</a>':'<span class="chip warn">Cargá un teléfono para mandar por WhatsApp</span>')+'<button type="button" data-act="accCopy">Copiar mensaje</button>'+btn("Contactado hoy","touched","clientes",id)+'</div>'+
+    '<div class="muted" style="font-size:12px">Los PDF de las pólizas no viajan dentro del link de WhatsApp: abrilos desde la lista de pólizas, descargalos y adjuntalos en el chat.</div></div></section>';
+  h+='</div>';
+  const sts=S.siniestros.filter(x=>x.clienteId===id);
+  h+='<section class="panel"><header><h2>Siniestros</h2><span class="count">'+sts.length+'</span><span style="margin-left:auto">'+btn("+ Siniestro","newrel","siniestros",id)+'</span></header>'+(sts.length?'<ul class="rows">'+sts.map(x=>{const falt=docsFalta(x,"siniestros");return li(esc(x.tipo||"Siniestro")+' <span class="chip '+(["Pagado","Cerrado"].includes(x.estado)?"ok":x.estado==="Rechazado"?"bad":"warn")+'">'+esc(x.estado||"Denunciado")+'</span>'+(falt.length?' <span class="chip warn">faltan '+falt.length+' docs</span>':''),fdate(x.fecha)+(x.numero?" · Nº "+esc(x.numero):"")+" · "+esc(x.proximoPaso||""),btn("Abrir","edit","siniestros",x.id))}).join("")+'</ul>':'<div class="empty">Sin siniestros.</div>')+'</section>';
+  if(opps.length)h+='<section class="panel"><header><h2>Oportunidades</h2><span class="count">'+opps.length+'</span></header><ul class="rows">'+opps.map(o=>li(esc((o.ramos||[]).join(", ")||"Oportunidad")+' <span class="chip acc">'+esc(o.etapa||"Contactado")+'</span>',esc(o.proximoPaso||"")+" · "+fdate(o.fechaProximo),btn("Abrir","edit","oportunidades",o.id))).join("")+'</ul></section>';
+  if(c.notas)h+='<section class="panel"><header><h2>Notas</h2></header><div style="padding:12px 16px;white-space:pre-wrap">'+esc(c.notas)+'</div></section>';
+  return h;
+}
+document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.sel;if(!k)return;if(e.target.checked)acc.sel.add(k);else acc.sel.delete(k);acc.draft=null;render()});
+document.addEventListener("input",e=>{if(e.target.id!=="msgTxt")return;acc.draft=e.target.value;const a=$("#accWa");if(a){const c=byId("clientes",acc.id)||{};a.href="https://wa.me/"+waNum(c.telefono)+"?text="+encodeURIComponent(acc.draft)}});
+
+// ---------- alertas
+function alertas(){
+  const A=[];const add=(lvl,titulo,quien,det,col,id)=>A.push({lvl,titulo,quien,det,col,id});
+  S.polizas.forEach(p=>{const q=cliName(p.clienteId);const st=p.estado||"Solicitada";
+    if(p.estado==="Emitida"&&p.vigHasta&&days(p.vigHasta)<0&&days(p.vigHasta)>=-120&&!CERR.includes(p.renovacion))add("bad","Póliza vencida sin renovar",q,(p.ramo||"")+" · venció "+fdate(p.vigHasta),"polizas",p.id);
+    else if(p.estado==="Emitida"&&p.vigHasta&&days(p.vigHasta)>=0&&days(p.vigHasta)<=10&&!CERR.includes(p.renovacion))add("bad","Vence en "+days(p.vigHasta)+" días sin renovar",q,(p.ramo||"")+" · "+(p.compania||""),"polizas",p.id);
+    if(st==="Observada")add("bad","Emisión observada por la compañía",q,(p.ramo||"")+" · "+(p.compania||""),"polizas",p.id);
+    if(["Solicitada","En emisión"].includes(st)&&p.fechaSolicitud&&days(p.fechaSolicitud)<=-5)add("warn","Emisión demorada ("+(-days(p.fechaSolicitud))+" días)",q,[p.ramo,p.compania].filter(Boolean).join(" · "),"polizas",p.id);
+    if(["Solicitada","En emisión","Observada"].includes(st)){const f=docsFalta(p,"polizas");if(f.length)add("warn","Falta documentación para emitir ("+f.length+")",q,f.slice(0,3).join(", ")+(f.length>3?"…":""),"polizas",p.id)}
+    if(st==="Emitida"&&!p.enviada)add("warn","Póliza emitida sin enviar al cliente",q,(p.ramo||""),"polizas",p.id);
+  });
+  S.cobranzas.forEach(k=>{if(k.estado==="Pagada"||!k.vencimiento)return;const d=days(k.vencimiento);const p=byId("polizas",k.polizaId)||{};
+    if(d<=-15)add("bad","Cuota con "+(-d)+" días de atraso (riesgo de anulación)",cliName(p.clienteId),(p.ramo||"")+" · "+money(k.importe),"cobranzas",k.id);
+    else if(k.estado==="Rechazada débito")add("bad","Débito rechazado",cliName(p.clienteId),(p.ramo||"")+" · "+money(k.importe),"cobranzas",k.id);
+    else if(d<0)add("warn","Cuota vencida",cliName(p.clienteId),(p.ramo||"")+" · "+money(k.importe),"cobranzas",k.id)});
+  S.siniestros.forEach(x=>{if(["Pagado","Rechazado","Cerrado"].includes(x.estado))return;const q=cliName(x.clienteId);
+    const f=docsFalta(x,"siniestros");if(f.length)add(x.fecha&&days(x.fecha)<=-3?"bad":"warn","Siniestro: faltan "+f.length+" documentos",q,f.slice(0,3).join(", ")+(f.length>3?"…":""),"siniestros",x.id);
+    if(x.fechaProximo&&days(x.fechaProximo)<=0)add("warn","Siniestro: "+(x.proximoPaso||"seguimiento")+" (hoy)",q,x.tipo||"","siniestros",x.id);
+    const upd=x.updatedAt?days(x.updatedAt.slice(0,10)):null;if(upd!=null&&upd<=-15)add("warn","Siniestro sin movimiento hace "+(-upd)+" días",q,(x.tipo||"")+" · "+(x.estado||""),"siniestros",x.id);
+    if(!x.fechaDenuncia&&x.fecha&&days(x.fecha)<=-2)add("bad","Siniestro sin denunciar (plazo de 3 días)",q,x.tipo||"","siniestros",x.id)});
+  return A.sort((a,b)=>(a.lvl==="bad"?0:1)-(b.lvl==="bad"?0:1));
+}
+function alertasView(){
+  const A=alertas();let h='<div class="toolbar"><h1>Alertas</h1></div><div class="muted" style="font-size:13.5px;max-width:75ch">Se calculan solas cada vez que abrís la app: vencimientos sin renovar, emisiones observadas o demoradas, documentación faltante, cuotas atrasadas, débitos rechazados y siniestros trabados.</div>';
+  if(!A.length)return h+'<div class="panel"><div class="empty">Todo en orden, no hay alertas.</div></div>';
+  return h+'<section class="panel"><ul class="rows">'+A.map(a=>li('<span class="chip '+a.lvl+'">'+(a.lvl==="bad"?"Urgente":"Atención")+'</span> '+esc(a.titulo),esc(a.quien)+(a.det?" · "+esc(a.det):""),btn("Abrir","edit",a.col,a.id))).join("")+'</ul></section>';
+}
+
+// ---------- v9: renovaciones, comisiones, tablero, teléfonos, respaldo, kit
+function cerrada(p){return CERR.includes(p.renovacion)}
+function mesHoy(){return todayISO().slice(0,7)}
+function cfg(){return S.config.find(c=>c.id==="general")||{}}
+function compInfo(n){return ((cfg().companias)||{})[n]||{}}
+function yo(){return Object.assign({nombre:"Leandro Perrone · LP Seguros",telefono:"",email:""},cfg().yo||{})}
+
+// --- renovaciones
+function renovPend(){return S.polizas.filter(p=>p.estado==="Emitida"&&p.vigHasta&&!cerrada(p)&&days(p.vigHasta)>=-120&&days(p.vigHasta)<=30).sort((a,b)=>a.vigHasta.localeCompare(b.vigHasta))}
+function renovMsg(p,c){return "Hola "+first(c.pila||c.nombre)+"! ¿Cómo estás? Te escribo de LP Seguros: tu póliza"+(p.ramo&&p.ramo!=="Otro"?" de "+p.ramo.toLowerCase():"")+(p.bien?" ("+p.bien+")":"")+(p.compania?" en "+p.compania:"")+(days(p.vigHasta)<0?" venció el ":" vence el ")+fdate(p.vigHasta)+". Ya estoy con la renovación para que no te quedes sin cobertura. ¿Seguimos igual o querés que cotice alternativas?"}
+function renovaciones(){
+  const f=["Pendientes","Cerradas este mes"].includes(filt.f)?filt.f:"Pendientes";const mk=mesHoy();
+  let h='<div class="toolbar"><h1>Renovaciones</h1><select id="f" aria-label="Filtro">'+["Pendientes","Cerradas este mes"].map(o=>'<option'+(o===f?" selected":"")+'>'+o+'</option>').join("")+'</select></div>';
+  if(f==="Cerradas este mes"){const cs=S.polizas.filter(p=>cerrada(p)&&(p.fechaRenov||p.fechaBaja||"").slice(0,7)===mk);
+    if(!cs.length)return h+'<div class="panel"><div class="empty">Todavía no cerraste renovaciones este mes.</div></div>';
+    return h+'<section class="panel"><ul class="rows">'+cs.map(p=>li(esc(cliName(p.clienteId))+' <span class="chip '+(p.renovacion==="Renovada"?"ok":"bad")+'">'+esc(p.renovacion)+'</span>',esc([p.ramo,p.compania,p.bien].filter(Boolean).join(" · ")),btn("Abrir","edit","polizas",p.id))).join("")+'</ul></section>'}
+  const R=renovPend();
+  h+='<div class="muted" style="font-size:13.5px;max-width:80ch">Pólizas que vencen en los próximos 30 días o ya vencieron sin cerrar. Movelas con un toque: <b>Cotizada</b> → <b>Enviada</b> → <b>Renovada</b> (o <b>Perdida</b>). Al marcarla renovada se abre para que cargues la nueva vigencia.</div>';
+  if(!R.length)return h+'<div class="panel"><div class="empty">No hay renovaciones pendientes en los próximos 30 días.</div></div>';
+  const grupos=[["Vencidas sin renovar",p=>days(p.vigHasta)<0,"bad"],["Vencen en 10 días",p=>days(p.vigHasta)>=0&&days(p.vigHasta)<=10,"warn"],["Vencen en 11 a 30 días",p=>days(p.vigHasta)>10,""]];
+  grupos.forEach(([t,fn,cl])=>{const g=R.filter(fn);if(!g.length)return;
+    h+='<section class="panel" style="margin-top:14px"><header><h2>'+t+'</h2><span class="count">'+g.length+'</span></header><ul class="rows">'+g.map(p=>{const c=byId("clientes",p.clienteId)||{};const d=days(p.vigHasta);const st=p.renovacion||"Pendiente";
+      return li(esc(c.nombre||"Sin cliente")+' <span class="chip '+cl+'">'+(d<0?"venció hace "+(-d)+" d":d===0?"vence hoy":"en "+d+" d")+'</span> <span class="chip '+(st==="Pendiente"?"":"acc")+'">'+esc(st)+'</span>',
+        esc([p.ramo,p.compania,p.bien].filter(Boolean).join(" · "))+" · vence "+fdate(p.vigHasta)+(p.numero?" · Nº "+esc(p.numero):""),
+        waBtn(c.telefono,renovMsg(p,c))+["Cotizada","Enviada al cliente","Renovada","Perdida"].filter(s=>s!==st).map(s=>'<button type="button" class="sm'+(s==="Perdida"?" danger":"")+'" data-act="ren" data-id="'+esc(p.id)+'" data-x="'+s+'">'+(s==="Enviada al cliente"?"Enviada":s)+'</button>').join("")+btn("Abrir","edit","polizas",p.id))}).join("")+'</ul></section>'});
+  return h;
+}
+
+// --- comisiones (privadas: data/users/<id>)
+function comPct(p){const c=COM||{};const pp=(c.porPoliza||{})[p.id];if(pp!=null&&pp!=="")return +pp;const pc=(c.porCompania||{})[p.compania||""];return pc!=null&&pc!==""?+pc:null}
+function comisiones(){
+  if(!me.owner)return '<div class="panel"><div class="empty">Esta sección es privada.</div></div>';
+  if(!COM)return '<div class="loading">Cargando…</div>';
+  const comps=[...new Set(S.polizas.map(p=>p.compania||"Sin compañía"))].sort();
+  const mk=mesHoy();const meses=[];{let k=mk;for(let i=0;i<6;i++){meses.unshift(k);k=prevMes(k)}}
+  const pag=S.cobranzas.filter(k=>k.estado==="Pagada"&&+k.importe>0);
+  const porMes={},porComp={};let sinPct=0;
+  pag.forEach(k=>{const p=byId("polizas",k.polizaId);if(!p)return;const pct=comPct(p);const m=(k.fechaPago||k.vencimiento||"").slice(0,7);if(pct==null){if(m===mk)sinPct++;return}const v=(+k.importe)*pct/100;porMes[m]=(porMes[m]||0)+v;if(m===mk){const n=p.compania||"Sin compañía";porComp[n]=(porComp[n]||0)+v}});
+  const cartera=S.polizas.filter(vigente).reduce((a,p)=>{const pct=comPct(p);const imp=+p.premio||ultImporte(p.id);return a+(pct!=null&&imp?imp*pct/100:0)},0);
+  let h='<div class="toolbar"><h1>Comisiones <span class="chip">🔒 privado</span></h1></div><div class="muted" style="font-size:13.5px;max-width:80ch">Solo vos ves esta sección: los porcentajes y los totales quedan guardados en tu usuario, no en la cartera compartida. Se calculan sobre las cuotas cobradas (importe × % de comisión), así que son una estimación sobre premio.</div>';
+  h+='<div class="kpis" style="margin-top:14px">'+kpi("Este mes",money(porMes[mk]||0),"sobre cuotas pagadas")+kpi("Mes anterior",money(porMes[prevMes(mk)]||0),"")+kpi("Cartera vigente",money(cartera),"estimado por mes")+kpi("Sin % cargado",sinPct,"cuotas de este mes",sinPct>0)+'</div>';
+  const max=Math.max(1,...meses.map(m=>porMes[m]||0));
+  h+='<div class="grid2"><section class="panel"><header><h2>Últimos 6 meses</h2></header><div class="bars">'+meses.map(m=>'<div class="barrow"><span>'+mesLabel(m)+'</span><div class="track"><div class="fill" style="width:'+((porMes[m]||0)/max*100).toFixed(1)+'%"></div></div><span class="mono">'+money(porMes[m]||0)+'</span></div>').join("")+'</div></section>';
+  h+='<section class="panel"><header><h2>Este mes por compañía</h2></header>'+(Object.keys(porComp).length?'<div class="bars">'+Object.entries(porComp).sort((a,b)=>b[1]-a[1]).map(([n,v])=>'<div class="barrow"><span>'+esc(n)+'</span><div class="track"><div class="fill" style="width:'+(v/Math.max(...Object.values(porComp))*100).toFixed(1)+'%"></div></div><span class="mono">'+money(v)+'</span></div>').join("")+'</div>':'<div class="empty">Todavía no hay cuotas pagadas con importe este mes.</div>')+'</section></div>';
+  h+='<section class="panel" style="margin-top:14px"><header><h2>% de comisión por compañía</h2></header><div style="padding:12px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">'+comps.map(n=>'<label style="display:flex;align-items:center;gap:8px;font-size:14px"><span style="flex:1">'+esc(n)+'</span><input type="number" min="0" max="100" step="0.5" style="width:80px" data-compct="'+esc(n)+'" value="'+esc(((COM.porCompania||{})[n])??"")+'"> %</label>').join("")+'</div><div class="muted" style="padding:0 16px 12px;font-size:12.5px">Si una póliza tiene otro porcentaje, cargalo en "Comisión propia" abajo.</div></section>';
+  const ex=Object.entries(COM.porPoliza||{}).filter(([id])=>byId("polizas",id));
+  h+='<section class="panel" style="margin-top:14px"><header><h2>Comisión propia por póliza</h2><span class="count">'+ex.length+'</span></header><div style="padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input list="polList" id="comPol" placeholder="Buscar póliza (cliente o Nº)…" style="flex:1;min-width:220px"><input type="number" id="comPolPct" placeholder="%" style="width:80px"><button type="button" class="sm primary" data-act="compol">Guardar</button></div><datalist id="polList">'+S.polizas.map(p=>'<option value="'+esc(cliName(p.clienteId)+" · "+(p.compania||"")+" · "+(p.numero||p.id))+'">').join("")+'</datalist>'+(ex.length?'<ul class="rows">'+ex.map(([id,v])=>{const p=byId("polizas",id);return li(esc(cliName(p.clienteId))+' <span class="chip acc">'+esc(v)+' %</span>',esc([p.ramo,p.compania,p.numero].filter(Boolean).join(" · ")),'<button type="button" class="sm" data-act="compoldel" data-id="'+esc(id)+'">Quitar</button>')}).join("")+'</ul>':'')+'</section>';
+  return h;
+}
+async function comSave(data){if(!me.uid)return;try{await db.collection("data/users/"+me.uid).doc("comisiones").set(Object.assign({porCompania:{},porPoliza:{}},COM||{},data,{updatedAt:new Date().toISOString()}))}catch(e){err(e)}}
+
+// --- tablero
+function tablero(){
+  const vig=S.polizas.filter(vigente);const mk=mesHoy(),pm=prevMes(mk);
+  const agg=key=>{const m={};vig.forEach(p=>{const k=p[key]||"Sin dato";m[k]=m[k]||{n:0,cli:new Set(),pr:0};m[k].n++;m[k].cli.add(p.clienteId);m[k].pr+=(+p.premio||ultImporte(p.id)||0)});return Object.entries(m).sort((a,b)=>b[1].n-a[1].n)};
+  const tbl=(t,rows)=>'<section class="panel"><header><h2>'+t+'</h2></header><div class="tablewrap" style="border:0"><table style="min-width:0"><thead><tr><th>'+(t.includes("compañía")?"Compañía":"Ramo")+'</th><th class="num">Pólizas</th><th class="num">Clientes</th><th class="num">Cuota/mes conocida</th></tr></thead><tbody>'+rows.map(([k,v])=>'<tr><td>'+esc(k)+'</td><td class="num">'+v.n+'</td><td class="num">'+v.cli.size+'</td><td class="num">'+(v.pr?money(v.pr):"—")+'</td></tr>').join("")+'</tbody></table></div></section>';
+  const isRenov=p=>/Póliza anterior: *[1-9]/.test(p.notas||"");
+  const altas=m=>S.polizas.filter(p=>(p.vigDesde||"").slice(0,7)===m&&!isRenov(p)&&p.estado!=="Anulada");
+  const renov=m=>S.polizas.filter(p=>p.renovacion==="Renovada"&&(p.fechaRenov||"").slice(0,7)===m);
+  const bajas=m=>S.polizas.filter(p=>(p.estado==="Anulada"||p.renovacion==="Perdida"||p.renovacion==="No renueva")&&(p.fechaBaja||"").slice(0,7)===m);
+  const meses=[];{let k=mk;for(let i=0;i<6;i++){meses.unshift(k);k=prevMes(k)}}
+  let h='<div class="toolbar"><h1>Tablero</h1><button type="button" class="sm" data-act="backup">Descargar respaldo Excel</button>'+(me.owner?'<label class="btn sm" style="cursor:pointer">Cargar datos (.json)<input type="file" id="rstFile" accept=".json,application/json" hidden></label>':'')+'</div>';
+  h+='<div class="kpis">'+kpi("Pólizas vigentes",vig.length,new Set(vig.map(p=>p.clienteId)).size+" clientes")+kpi("Altas "+mesLabel(mk),altas(mk).length,"mes anterior: "+altas(pm).length)+kpi("Renovadas "+mesLabel(mk),renov(mk).length,"pendientes: "+renovPend().length)+kpi("Bajas "+mesLabel(mk),bajas(mk).length,"mes anterior: "+bajas(pm).length,bajas(mk).length>0)+'</div>';
+  h+='<div class="grid2">'+tbl("Cartera por compañía",agg("compania"))+tbl("Cartera por ramo",agg("ramo"))+'</div>';
+  h+='<section class="panel" style="margin-top:14px"><header><h2>Altas y bajas, últimos 6 meses</h2></header><div class="tablewrap" style="border:0"><table style="min-width:0"><thead><tr><th>Mes</th><th class="num">Altas</th><th class="num">Renovadas</th><th class="num">Bajas</th><th class="num">Neto</th></tr></thead><tbody>'+meses.map(m=>{const a=altas(m).length,r=renov(m).length,b=bajas(m).length;return '<tr><td>'+mesLabel(m)+'</td><td class="num">'+a+'</td><td class="num">'+r+'</td><td class="num">'+b+'</td><td class="num">'+(a-b>0?"+":"")+(a-b)+'</td></tr>'}).join("")+'</tbody></table></div><div class="muted" style="padding:8px 16px 12px;font-size:12.5px">Altas: pólizas nuevas por inicio de vigencia (sin las renovaciones). Bajas: anuladas o perdidas, desde que se marcan en la app.</div></section>';
+  // datos para el kit
+  const comps=[...new Set(S.polizas.map(p=>p.compania).filter(Boolean))].sort();const Y=yo();
+  h+='<section class="panel" style="margin-top:14px"><header><h2>Teléfonos útiles para el kit de bienvenida</h2></header><div class="muted" style="padding:10px 16px 0;font-size:12.5px">Cargalos una vez y salen solos en el kit de cada póliza. Copiá los números de la web o la póliza de cada compañía.</div><div style="padding:12px 16px;display:grid;gap:10px">'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px"><label class="fld">Tu nombre en el kit<input data-cfgyo="nombre" value="'+esc(Y.nombre)+'"></label><label class="fld">Tu teléfono / WhatsApp<input data-cfgyo="telefono" value="'+esc(Y.telefono)+'"></label><label class="fld">Tu mail<input data-cfgyo="email" value="'+esc(Y.email)+'"></label></div>'+
+    comps.map(n=>{const ci=compInfo(n);return '<div style="display:grid;grid-template-columns:minmax(140px,1fr) repeat(3,minmax(140px,1fr));gap:8px;align-items:end"><b style="font-size:14px;padding-bottom:8px">'+esc(n)+'</b><label class="fld">Auxilio mecánico<input data-cfgc="'+esc(n)+'" data-k="auxilio" value="'+esc(ci.auxilio||"")+'"></label><label class="fld">Denuncia de siniestros<input data-cfgc="'+esc(n)+'" data-k="siniestros" value="'+esc(ci.siniestros||"")+'"></label><label class="fld">Web / app<input data-cfgc="'+esc(n)+'" data-k="web" value="'+esc(ci.web||"")+'"></label></div>'}).join("")+'</div></section>';
+  return h;
+}
+async function cfgSave(fn){const c=JSON.parse(JSON.stringify(cfg()));delete c.id;fn(c);c.updatedAt=new Date().toISOString();try{await db.collection("config").doc("general").set(c)}catch(e){err(e)}}
+
+// --- importar teléfonos
+let XLSXlib=null;
+function loadXLSX(){if(XLSXlib)return Promise.resolve(XLSXlib);return new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";s.onload=()=>{XLSXlib=window.XLSX;res(XLSXlib)};s.onerror=()=>rej(new Error("No se pudo cargar el lector de Excel"));document.head.appendChild(s)})}
+const normTxt=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().replace(/\(.*?\)/g," ").replace(/[^A-Z0-9 ]/g," ").replace(/\s+/g," ").trim();
+function matchCliente(nombre,doc){const d=String(doc||"").replace(/\D/g,"");
+  if(d.length>=7){const dn=d.length===11?d.slice(2,10):d;const c=S.clientes.find(c=>String(c.dni||"").replace(/\D/g," ").split(" ").some(x=>x&&(x===d||x===dn||x.slice(2,10)===dn)));if(c)return c}
+  const n=normTxt(nombre);if(!n)return null;const ex=S.clientes.filter(c=>normTxt(c.nombre)===n);if(ex.length===1)return ex[0];
+  const tk=n.split(" ");const cand=S.clientes.filter(c=>{const ct=normTxt(c.nombre).split(" ");return tk.every(t=>ct.includes(t))||ct.every(t=>tk.includes(t))});return cand.length===1?cand[0]:null}
+let impRows=null;
+function parseRows(rows){rows=rows.filter(r=>r&&r.some(v=>String(v??"").trim()));if(!rows.length)return [];
+  let hi=rows.findIndex(r=>r.some(v=>/tel|cel|whats|movil|móvil/i.test(String(v??""))));let H=hi>=0?rows[hi].map(v=>String(v??"").toLowerCase()):null;const body=hi>=0?rows.slice(hi+1):rows;
+  const col=(re,def)=>{if(!H)return def;const i=H.findIndex(v=>re.test(v));return i};
+  const ct=col(/tel|cel|whats|m[oó]vil/,-1),cd=col(/dni|cuit|cuil|documento|doc/,-1),cn=col(/nombre|asegurado|cliente|apellido|raz/,-1);
+  return body.map(r=>{let tel,doc,nom;if(H){tel=r[ct];doc=cd>=0?r[cd]:"";nom=cn>=0?r[cn]:""}else{const cells=r.map(v=>String(v??"").trim());tel=cells.find(v=>/\d{8,}/.test(v.replace(/\D/g,""))&&!/^\d{7,8}$/.test(v))||"";doc=cells.find(v=>/^\d{7,8}$|^\d{2}-?\d{8}-?\d$/.test(v))||"";nom=cells.find(v=>/[a-zA-Z]{3,}/.test(v))||""}
+    tel=String(tel??"").trim();const c=tel?matchCliente(nom,doc):null;return {nom:String(nom??"").trim(),doc:String(doc??"").trim(),tel,c}}).filter(x=>x.tel)}
+function impRender(){const b=$("#impRes");if(!b)return;if(!impRows){b.innerHTML="";return}const ok=impRows.filter(r=>r.c),no=impRows.filter(r=>!r.c);
+  b.innerHTML='<div class="notice" style="margin-top:10px"><span><b>'+ok.length+'</b> teléfonos coinciden con clientes'+(no.length?' · <b>'+no.length+'</b> sin coincidencia':'')+'.</span>'+(ok.length?'<button type="button" class="sm primary" data-act="impgo">Cargar '+ok.length+' teléfonos</button>':'')+'</div><div style="max-height:40vh;overflow:auto;margin-top:8px"><ul class="rows">'+impRows.slice(0,400).map(r=>li((r.c?esc(r.c.nombre):'<span class="chip warn">sin coincidencia</span> '+esc(r.nom||r.doc)),esc(r.tel)+(r.c&&r.c.telefono&&waNum(r.c.telefono)!==waNum(r.tel)?' · ya tiene '+esc(r.c.telefono)+' (este va como teléfono 2)':r.c&&r.c.telefono?' · ya cargado':''),"")).join("")+'</ul></div>'}
+function impOpen(){const d=$("#impDlg");impRows=null;$("#impTxt").value="";$("#impFile").value="";impRender();d.showModal()}
+
+// --- respaldo
+async function backup(){try{const X=await loadXLSX();const wb=X.utils.book_new();
+  const cn=id=>cliName(id);const pol=id=>{const p=byId("polizas",id)||{};return p};
+  const sheets={Clientes:S.clientes.map(c=>({Cuenta:c.nroCuenta,Nombre:c.nombre,Tipo:c.tipo,DNI:c.dni,Telefono:c.telefono,Telefono2:c.telefono2,Email:c.email,Localidad:c.localidad,Nacimiento:c.nacimiento,Responsable:c.responsable,UltimoContacto:c.ultimoContacto,Notas:c.notas})),
+    Polizas:S.polizas.map(p=>({Cliente:cn(p.clienteId),Ramo:p.ramo,Compania:p.compania,Numero:p.numero,Bien:p.bien,Cobertura:p.cobertura,Estado:p.estado,VigDesde:p.vigDesde,VigHasta:p.vigHasta,DiaCuota:p.diaCuota,Premio:p.premio,Renovacion:p.renovacion,Notas:p.notas})),
+    Cobranzas:S.cobranzas.map(k=>({Cliente:cn(pol(k.polizaId).clienteId),Poliza:pol(k.polizaId).numero,Compania:pol(k.polizaId).compania,Periodo:k.periodo,Vencimiento:k.vencimiento,Importe:k.importe,Estado:k.estado,FechaPago:k.fechaPago})),
+    Oportunidades:S.oportunidades.map(o=>({Cliente:o.prospecto||cn(o.clienteId),Ramos:(o.ramos||[]).join(", "),Etapa:o.etapa,Prima:o.prima,ProximoPaso:o.proximoPaso,Fecha:o.fechaProximo,Notas:o.notas})),
+    Siniestros:S.siniestros.map(s=>({Cliente:cn(s.clienteId),Tipo:s.tipo,Fecha:s.fecha,Estado:s.estado,Numero:s.numero,Descripcion:s.descripcion,ProximoPaso:s.proximoPaso}))};
+  Object.entries(sheets).forEach(([n,rows])=>X.utils.book_append_sheet(wb,X.utils.json_to_sheet(rows.length?rows:[{}]),n));
+  const buf=X.write(wb,{bookType:"xlsx",type:"array"});const name="cartera-lp-respaldo-"+todayISO()+".xlsx";
+  const dl=window.claude?await claude.use("downloads").catch(()=>null):null;
+  if(dl){await dl.save({filename:name,data:new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})});toast("Respaldo listo")}
+  else{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([buf]));a.download=name;a.click();toast("Respaldo descargado")}
+}catch(e){console.error(e);if(e&&e.code==="declined")return;toast("No se pudo armar el respaldo")}}
+
+// --- kit de bienvenida
+function kitData(pid){const p=byId("polizas",pid);if(!p)return null;const c=byId("clientes",p.clienteId)||{};return {p,c,ci:compInfo(p.compania||""),Y:yo()}}
+function kitTexto(k){const {p,c,ci,Y}=k;const L=[];
+  L.push("Hola "+first(c.pila||c.nombre)+"!","","Te doy la bienvenida: ya está emitida tu póliza"+(p.ramo&&p.ramo!=="Otro"?" de "+p.ramo.toLowerCase():"")+(p.compania?" en "+p.compania:"")+". Te dejo los datos importantes para que los tengas a mano:","");
+  L.push("📄 DATOS DE TU PÓLIZA");if(p.compania)L.push("Compañía: "+p.compania);if(p.numero)L.push("Póliza Nº: "+p.numero);if(p.bien)L.push("Bien asegurado: "+p.bien);if(p.cobertura)L.push("Cobertura: "+p.cobertura);if(p.vigDesde||p.vigHasta)L.push("Vigencia: "+fdate(p.vigDesde)+" al "+fdate(p.vigHasta));if(p.diaCuota)L.push("La cuota vence el "+p.diaCuota+" de cada mes");
+  L.push("","📞 TELÉFONOS ÚTILES");if(ci.auxilio)L.push("Auxilio mecánico / asistencia: "+ci.auxilio);if(ci.siniestros)L.push("Denuncia de siniestros: "+ci.siniestros);if(ci.web)L.push("Web / app de la compañía: "+ci.web);L.push("Tu productor: "+Y.nombre+(Y.telefono?" · "+Y.telefono:"")+(Y.email?" · "+Y.email:""));
+  if((p.ramo||"")==="Auto"||(p.ramo||"")==="Moto")L.push("","🚗 Llevá siempre la tarjeta de circulación (te la adjunto) junto con la cédula y el registro. En caso de choque: sacá fotos, pedí los datos del otro conductor (nombre, DNI, patente y compañía) y avisame dentro de las 72 horas para hacer la denuncia.");
+  else L.push("","Ante cualquier siniestro, avisame dentro de las 72 horas y te ayudo con la denuncia.");
+  L.push("","Cualquier duda, estoy a disposición. ¡Gracias por confiar en LP Seguros!");return L.join("\n")}
+function kit(pid){const k=kitData(pid);if(!k)return '<div class="panel"><div class="empty">No encontré esa póliza.</div></div>';const {p,c,ci,Y}=k;const txt=kitTexto(k);
+  const faltan=[!ci.auxilio&&!ci.siniestros?"los teléfonos de "+(p.compania||"la compañía"):"",!Y.telefono?"tu teléfono":""].filter(Boolean);
+  const arch=(p.archivos||[]);
+  let h='<div class="noprint"><a class="muted" href="#cuenta-'+esc(c.id||"")+'" style="font-size:13px;text-decoration:none">← '+esc(c.nombre||"Cliente")+'</a><div class="toolbar"><h1>Kit de bienvenida</h1><button type="button" class="sm" data-act="kitprint">Imprimir / guardar PDF</button><button type="button" class="sm" data-act="kitcopy">Copiar texto</button>'+(c.email?'<a class="btn sm" href="mailto:'+esc(c.email)+'?subject='+encodeURIComponent("Bienvenida · tu póliza"+(p.compania?" de "+p.compania:""))+'&body='+encodeURIComponent(txt)+'">Abrir mail</a>':'')+waBtn(c.telefono,txt)+'<button type="button" class="sm" data-act="sent" data-col="polizas" data-id="'+esc(p.id)+'">Marcar enviada</button></div>'+
+    (faltan.length?'<div class="notice"><span>Falta cargar '+faltan.join(" y ")+'. Se cargan una sola vez en <a href="#tablero">Tablero</a>.</span></div>':'')+
+    '<div class="muted" style="font-size:13px;margin:8px 0">La tarjeta de abajo es un resumen. La <b>tarjeta de circulación oficial</b> la emite la compañía: '+(arch.length?'adjuntá el PDF que está en la póliza ('+arch.map(a=>'<a href="'+esc(fileHref(a))+'" target="_blank" rel="noopener">'+esc(a.name||"archivo")+'</a>').join(", ")+').':'subila a la póliza (Archivos) para tenerla a mano y adjuntarla.')+(!c.email?' El cliente no tiene mail cargado.':'')+'</div></div>';
+  h+='<div class="kit"><div class="kitcard"><div class="kc-h"><span>LP Seguros</span><span>'+esc(p.compania||"")+'</span></div><div class="kc-t">Tarjeta de cobertura</div><dl>'+
+    [["Asegurado",c.nombre],["DNI / CUIT",c.dni],["Póliza Nº",p.numero],["Ramo",p.ramo],["Bien asegurado",p.bien],["Cobertura",p.cobertura],["Vigencia",(p.vigDesde||p.vigHasta)?fdate(p.vigDesde)+" al "+fdate(p.vigHasta):""]].filter(x=>x[1]).map(([a,b])=>'<dt>'+a+'</dt><dd>'+esc(b)+'</dd>').join("")+'</dl><div class="kc-f">Resumen informativo. Documento válido: tarjeta de circulación / certificado emitido por la compañía.</div></div>'+
+    '<div class="kitphones"><h3>Teléfonos útiles</h3><ul>'+(ci.auxilio?'<li><b>Auxilio / asistencia</b><span>'+esc(ci.auxilio)+'</span></li>':'')+(ci.siniestros?'<li><b>Denuncia de siniestros</b><span>'+esc(ci.siniestros)+'</span></li>':'')+(ci.web?'<li><b>Web / app</b><span>'+esc(ci.web)+'</span></li>':'')+'<li><b>Tu productor</b><span>'+esc(Y.nombre)+(Y.telefono?'<br>'+esc(Y.telefono):'')+(Y.email?'<br>'+esc(Y.email):'')+'</span></li></ul><h3>Si tenés un siniestro</h3><ol><li>Sacá fotos y pedí los datos del otro (nombre, DNI, patente, compañía).</li><li>Llamá al número de siniestros o escribime.</li><li>Hacé la denuncia dentro de las 72 horas.</li></ol></div></div>';
+  h+='<section class="panel noprint" style="margin-top:14px"><header><h2>Texto para el mail o WhatsApp</h2></header><textarea id="kitTxt" rows="14" style="margin:12px 16px;width:calc(100% - 32px)">'+esc(txt)+'</textarea></section>';
+  return h}
+
+// ---------- actions
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("[data-act]");if(!t)return;const {act,col,id,x}=t.dataset;
+  if(act==="edit")openForm(col,id);
+  else if(act==="open"){location.hash="cuenta-"+id}
+  else if(act==="accCopy"){const m=($("#msgTxt")||{}).value||"";if(!m){toast("Elegí primero qué mandar");return}try{await navigator.clipboard.writeText(m);toast("Mensaje copiado")}catch(er){$("#msgTxt").select();toast("Seleccioné el texto: copialo con Ctrl+C")}}
+  else if(act==="new")openForm(col,null,defaults(col));
+  else if(act==="newrel"){const key=col==="cobranzas"?"polizaId":"clienteId";openForm(col,null,Object.assign(defaults(col),{[key]:id}))}
+  else if(act==="paid"){const k=byId("cobranzas",id)||{};await patch("cobranzas",id,{estado:"Pagada",fechaPago:todayISO()});
+    if(+k.importe>0)toast("Cuota marcada como pagada");else{setTimeout(()=>{openForm("cobranzas",id);const f=$("#f_importe");if(f){const u=ultImporte(k.polizaId);if(u&&!f.value)f.placeholder="último: "+u;f.focus()}},120);toast("Pagada. Cargá el importe que pagó")}}
+  else if(act==="avisado"){await patch("cobranzas",id,{estado:"Avisado",fechaAviso:todayISO()});toast("Marcada como avisada")}
+  else if(act==="noop"){}
+  else if(act==="ren"){const pp=byId("polizas",id)||{};const d={renovacion:x};const tt=todayISO();if(x==="Renovada")d.fechaRenov=tt;if(x==="Perdida")d.fechaBaja=tt;await patch("polizas",id,d);
+    if(x==="Renovada"){toast("Renovada: cargá la nueva vigencia");setTimeout(()=>openForm("polizas",id),150)}else toast("Marcada: "+(x==="Enviada al cliente"?"enviada":x.toLowerCase()))}
+  else if(act==="compol"){const v=$("#comPol").value,pc=$("#comPolPct").value;const pp=S.polizas.find(p=>v===cliName(p.clienteId)+" · "+(p.compania||"")+" · "+(p.numero||p.id));if(!pp||pc===""){toast("Elegí una póliza de la lista y el %");return}
+    const pol=Object.assign({},(COM||{}).porPoliza||{},{[pp.id]:+pc});await comSave({porPoliza:pol});toast("Guardado")}
+  else if(act==="compoldel"){const pol=Object.assign({},(COM||{}).porPoliza||{});delete pol[id];await comSave({porPoliza:pol})}
+  else if(act==="backup"){backup()}
+  else if(act==="kitprint"){try{window.print()}catch(e){toast("Usá Ctrl+P para imprimir o guardar en PDF")}}
+  else if(act==="kitcopy"){const m=($("#kitTxt")||{}).value||"";try{await navigator.clipboard.writeText(m);toast("Texto copiado")}catch(er){$("#kitTxt").select();toast("Seleccioné el texto: copialo con Ctrl+C")}}
+  else if(act==="impopen"){impOpen()}
+  else if(act==="impclose"){$("#impDlg").close()}
+  else if(act==="impparse"){const txt=$("#impTxt").value;const rows=txt.split(/\r?\n/).map(l=>l.split(/\t|;|,(?=\S)/));impRows=parseRows(rows);impRender()}
+  else if(act==="impgo"){const ok=(impRows||[]).filter(r=>r.c);t.disabled=true;t.textContent="Cargando…";let n=0;
+    for(const r of ok){const c=byId("clientes",r.c.id)||r.c;const d={};if(!c.telefono)d.telefono=r.tel;else if(waNum(c.telefono)!==waNum(r.tel)&&!c.telefono2)d.telefono2=r.tel;if(Object.keys(d).length){d.updatedAt=new Date().toISOString();await patch("clientes",c.id,d);n++}}
+    toast(n+" clientes actualizados");$("#impDlg").close()}
+  else if(act==="gencuotas"){const mk=x;const L=cuotasFaltantes(mk);if(!L.length){toast("No hay cuotas para generar");return}t.disabled=true;t.textContent="Generando…";
+    try{const now=new Date().toISOString();for(const it of L)await db.collection("cobranzas").doc("auto-"+it.p.id+"-"+mk).set({polizaId:it.p.id,periodo:mk.slice(5)+"/"+mk.slice(0,4),vencimiento:it.venc,estado:"A cobrar",auto:true,createdAt:now,updatedAt:now});toast(L.length+" cuotas generadas")}catch(er){err(er)}}
+  else if(act==="sent"){await patch("polizas",id,{enviada:true});toast("Marcada como enviada")}
+  else if(act==="touched"){await patch("clientes",id,{ultimoContacto:todayISO()});toast("Contacto registrado")}
+  else if(act==="mkopp"){const c=byId("clientes",id)||{};openForm("oportunidades",null,Object.assign(defaults("oportunidades"),{clienteId:id,telefono:c.telefono||"",ramos:[x],etapa:"Contactado",proximoPaso:"Ofrecer "+x}))}
+  else if(act==="rmfile"){cur.files.splice(+t.dataset.i,1);renderFiles()}
+  else if(act==="copy"){const m=t.dataset.msg;try{await navigator.clipboard.writeText(m);toast("Mensaje copiado")}catch(er){toast("No se pudo copiar")}}
+  else if(act==="done"){try{await db.collection("recordatorios").doc(id).set({tipo:x,hecho:todayISO()});toast("Listo")}catch(er){err(er)}}
+  else if(act==="clearex"){if(!t.classList.contains("armed")){t.classList.add("armed","danger");t.textContent="Confirmar: borrar ejemplos";return}
+    try{for(const c of COLS)for(const r of S[c].filter(r=>r.ejemplo))await db.collection(c).doc(r.id).delete();toast("Ejemplos borrados")}catch(er){err(er)}}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("tr[data-act]"))e.target.click()});
+document.addEventListener("input",e=>{if(e.target.id==="q"){filt.q=e.target.value;render()}});
+document.addEventListener("change",e=>{if(e.target.id==="f"){filt.f=e.target.value;render()}});
+document.addEventListener("change",async e=>{const t=e.target;
+  if(t.dataset.compct!=null){const pc=Object.assign({},(COM||{}).porCompania||{});if(t.value==="")delete pc[t.dataset.compct];else pc[t.dataset.compct]=+t.value;await comSave({porCompania:pc});toast("Guardado")}
+  else if(t.dataset.cfgyo){const k=t.dataset.cfgyo,v=t.value.trim();await cfgSave(c=>{c.yo=Object.assign({},c.yo||{},{[k]:v})});toast("Guardado")}
+  else if(t.dataset.cfgc){const n=t.dataset.cfgc,k=t.dataset.k,v=t.value.trim();await cfgSave(c=>{c.companias=Object.assign({},c.companias||{});c.companias[n]=Object.assign({},c.companias[n]||{},{[k]:v})});toast("Guardado")}
+  else if(t.id==="rstFile"&&t.files[0]){try{const data=JSON.parse(await t.files[0].text());const cols=Object.keys(data).filter(k=>Array.isArray(data[k])&&k!=="data");const tot=cols.reduce((n,k)=>n+data[k].length,0);
+    if(!tot){toast("El archivo no tiene datos");return}
+    if(!confirm("Se van a cargar "+tot+" registros ("+cols.map(k=>k+": "+data[k].length).join(", ")+"). Si ya existen, se actualizan. ¿Seguimos?"))return;
+    let n=0,b=db.batch(),k=0;for(const c of cols)for(const d of data[c]){if(!d||!d.id)continue;const o=Object.assign({},d);delete o.id;b.set(db.collection(c).doc(String(d.id)),o,{merge:true});k++;n++;if(k>=400){await b.commit();b=db.batch();k=0;toast("Cargando… "+n+"/"+tot)}}
+    if(k)await b.commit();toast("Listo: "+n+" registros cargados")}catch(er){console.error(er);toast("No pude cargar ese archivo")}finally{t.value=""}}
+  else if(t.id==="impFile"&&t.files[0]){const f=t.files[0];try{const X=await loadXLSX();const wb=X.read(await f.arrayBuffer(),{type:"array"});const ws=wb.Sheets[wb.SheetNames[0]];impRows=parseRows(X.utils.sheet_to_json(ws,{header:1,raw:false,defval:""}));impRender()}catch(er){console.error(er);toast("No pude leer ese archivo")}}});
+function defaults(col){const t=todayISO();return col==="polizas"?{estado:"Solicitada",fechaSolicitud:t,renovacion:"Pendiente"}:col==="cobranzas"?{estado:"A cobrar"}:col==="oportunidades"?{etapa:"Contactado",fechaProximo:t}:col==="siniestros"?{estado:"Denunciado",fecha:t,fechaDenuncia:t}:{tipo:"Persona"}}
+$("#btnNew").onclick=()=>{const col=SCHEMA[view]?view:"clientes";openForm(col,null,defaults(col))};
+
+route();boot();
+})();
+</script>
+
+</body></html>
