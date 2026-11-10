@@ -156,6 +156,7 @@ label.fld{font-size:12px;font-weight:600;color:var(--ink-2)}
       <a href="#clientes" data-v="clientes">Clientes<span class="n" id="n_clientes"></span></a>
       <a href="#polizas" data-v="polizas">Pólizas<span class="n" id="n_polizas"></span></a>
       <a href="#renovaciones" data-v="renovaciones">Renovaciones<span class="n" id="n_ren"></span></a>
+      <a href="#manual" data-v="manual">Pago manual<span class="n" id="n_manual"></span></a>
       <a href="#cobranzas" data-v="cobranzas">Cobranzas<span class="n" id="n_cobranzas"></span></a>
       <a href="#oportunidades" data-v="oportunidades">Oportunidades<span class="n" id="n_oportunidades"></span></a>
       <a href="#siniestros" data-v="siniestros">Siniestros<span class="n" id="n_siniestros"></span></a>
@@ -274,7 +275,7 @@ const SCHEMA={
   {k:"vigHasta",l:"Vigencia hasta",t:"date"},
   {k:"premio",l:"Premio mensual ($)",t:"number"},
   {k:"diaCuota",l:"La cuota vence el día (1 a 31)",t:"number"},
-  {k:"formaPago",l:"Forma de pago",t:"select",o:["Débito tarjeta","Débito CBU","Pago manual","Contado"]},
+  {k:"formaPago",l:"Forma de pago",t:"select",o:["Débito tarjeta","Débito CBU","Débito","Pago manual","Contado"]},
   {k:"renovacion",l:"Renovación",t:"select",o:RENOV},
   {k:"responsable",l:"Responsable",t:"select",o:RESP},
   {k:"enviada",l:"Póliza enviada al cliente",t:"check",full:1},
@@ -395,16 +396,16 @@ async function save(col,id,data){
 async function patch(col,id,data){try{await db.collection(col).doc(id).update(data);}catch(e){err(e)}}
 
 // ---------- routing
-function route(){const h=location.hash.slice(1);view=SCHEMA[h]||["panel","aumentos","recordatorios","alertas","renovaciones","tablero","comisiones"].includes(h)||h.startsWith("cuenta-")||h.startsWith("kit-")?h:"panel";filt.q="";filt.f="";render()}
+function route(){const h=location.hash.slice(1);view=SCHEMA[h]||["panel","aumentos","recordatorios","alertas","renovaciones","tablero","comisiones","manual"].includes(h)||h.startsWith("cuenta-")||h.startsWith("kit-")?h:"panel";filt.q="";filt.f="";render()}
 window.addEventListener("hashchange",route);
 
 function render(){
   document.querySelectorAll("#tabs a").forEach(a=>{if(a.dataset.v===view||(a.dataset.v==="clientes"&&view.startsWith("cuenta-")))a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
   COLS.forEach(c=>{const el=$("#n_"+c);if(el)el.textContent=S[c].length||""});
-  if(COLS.every(c=>loaded[c])){const r=reminders().length;$("#n_rec").textContent=r||"";$("#n_ren").textContent=renovPend().length||"";const a=alertas().filter(x=>x.lvl==="bad").length;$("#n_alertas").textContent=a||""}
+  if(COLS.every(c=>loaded[c])){const r=reminders().length;$("#n_rec").textContent=r||"";$("#n_ren").textContent=renovPend().length||"";$("#n_manual").textContent=S.polizas.filter(esManual).length||"";const a=alertas().filter(x=>x.lvl==="bad").length;$("#n_alertas").textContent=a||""}
   if(!COLS.every(c=>loaded[c])){return}
   const v=$("#view");const ae=document.activeElement,keepFocus=ae&&ae.id==="q",keepMsg=ae&&ae.id==="msgTxt"?[ae.selectionStart,ae.selectionEnd]:null;
-  v.innerHTML=view==="panel"?panel():view==="aumentos"?aumentos():view==="recordatorios"?recordatorios():view==="alertas"?alertasView():view.startsWith("cuenta-")?cuenta(view.slice(7)):view==="renovaciones"?renovaciones():view==="tablero"?tablero():view==="comisiones"?comisiones():view.startsWith("kit-")?kit(view.slice(4)):list(view);
+  v.innerHTML=view==="panel"?panel():view==="aumentos"?aumentos():view==="recordatorios"?recordatorios():view==="alertas"?alertasView():view.startsWith("cuenta-")?cuenta(view.slice(7)):view==="renovaciones"?renovaciones():view==="manual"?pagoManual():view==="tablero"?tablero():view==="comisiones"?comisiones():view.startsWith("kit-")?kit(view.slice(4)):list(view);
   if(keepMsg){const m=$("#msgTxt");if(m){m.focus();m.setSelectionRange(keepMsg[0],keepMsg[1])}}
   if(keepFocus){const q=$("#q");if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}}
 }
@@ -904,6 +905,40 @@ function kit(pid){const k=kitData(pid);if(!k)return '<div class="panel"><div cla
   h+='<section class="panel noprint" style="margin-top:14px"><header><h2>Texto para el mail o WhatsApp</h2></header><textarea id="kitTxt" rows="14" style="margin:12px 16px;width:calc(100% - 32px)">'+esc(txt)+'</textarea></section>';
   return h}
 
+// ---------- pago manual (cupón)
+function esManual(p){return p.formaPago==="Pago manual"}
+function isoOf(y,m,d){const last=new Date(y,m+1,0).getDate();return y+"-"+String(m+1).padStart(2,"0")+"-"+String(Math.min(d,last)).padStart(2,"0")}
+function diaCuotaDe(p){if(+p.diaCuota)return {d:+p.diaCuota,src:""};
+  const m=/facturaci[oó]n actual hasta (\d{2})\/(\d{2})\/(\d{4})/i.exec(p.notas||"");if(m)return {d:+m[1],src:"según el período de facturación"};
+  if(p.vigDesde)return {d:+p.vigDesde.slice(8,10),src:"según el inicio de vigencia"};return null}
+function proxCuota(p){const hoy=todayISO();
+  const imp=S.cobranzas.filter(k=>k.polizaId===p.id&&k.estado!=="Pagada"&&k.vencimiento&&k.vencimiento<hoy).sort((a,b)=>a.vencimiento.localeCompare(b.vencimiento));
+  if(imp.length)return {venc:imp[0].vencimiento,atrasada:true,cob:imp[0]};
+  const dc=diaCuotaDe(p);if(!dc)return null;const t=new Date(hoy+"T12:00:00");let y=t.getFullYear(),m=t.getMonth();
+  for(let i=0;i<14;i++){const v=isoOf(y,m,dc.d);const pag=S.cobranzas.some(k=>k.polizaId===p.id&&k.estado==="Pagada"&&(k.vencimiento||"").slice(0,7)===v.slice(0,7));
+    if(v>=hoy&&!pag){if(p.vigHasta&&v>p.vigHasta)return {venc:null};const cob=S.cobranzas.find(k=>k.polizaId===p.id&&(k.vencimiento||"").slice(0,7)===v.slice(0,7));return {venc:v,src:dc.src,cob}}
+    m++;if(m>11){m=0;y++}}
+  return null}
+function pagoManual(){
+  const f=["Vigentes","Todas"].includes(filt.f)?filt.f:"Vigentes";const q=filt.q.trim().toLowerCase();
+  const match=p=>!q||[cliName(p.clienteId),p.ramo,p.compania,p.bien,p.numero].join(" ").toLowerCase().includes(q);
+  let h='<div class="toolbar"><h1>Pago manual</h1><input type="search" id="q" placeholder="Buscar asegurado, patente, póliza…" aria-label="Buscar" value="'+esc(filt.q)+'"><select id="f" aria-label="Filtro">'+["Vigentes","Todas"].map(o=>'<option'+(o===f?" selected":"")+'>'+o+'</option>').join("")+'</select></div>';
+  h+='<div class="muted" style="font-size:13.5px;max-width:80ch">Solo los asegurados que pagan con <b>cupón</b> (forma de pago “Pago manual”), ordenados por la cuota que vence primero. Para cada uno ves primero el <b>vencimiento de la cuota mensual</b> y después el <b>fin de vigencia</b> de la póliza.</div>';
+  const M=S.polizas.filter(p=>esManual(p)&&(f==="Todas"||vigente(p))&&match(p)).map(p=>({p,c:byId("clientes",p.clienteId)||{},q:proxCuota(p)}));
+  const key=x=>x.q&&x.q.venc?x.q.venc:"9999";M.sort((a,b)=>key(a).localeCompare(key(b))||cliName(a.p.clienteId).localeCompare(cliName(b.p.clienteId)));
+  if(!M.length)h+='<section class="panel" style="margin-top:14px"><div class="empty">'+(q?'No hay pólizas de pago manual que coincidan con la búsqueda.':'Todavía no hay pólizas marcadas como pago manual. Marcalas en la lista de abajo o desde Editar → Forma de pago.')+'</div></section>';
+  else h+='<section class="panel" style="margin-top:14px"><header><h2>Pagan con cupón</h2><span class="count">'+M.length+'</span></header><ul class="rows">'+M.map(({p,c,q})=>{
+    const dq=q&&q.venc?days(q.venc):null,dv=p.vigHasta?days(p.vigHasta):null;
+    const chipQ=!q?'<span class="chip">sin día de cuota</span>':!q.venc?'<span class="chip">sin más cuotas</span>':q.atrasada?'<span class="chip bad">cuota atrasada '+(-dq)+' d</span>':'<span class="chip '+(dq<=3?"warn":"acc")+'">cuota '+(dq===0?"hoy":"en "+dq+" d")+'</span>';
+    const cuota='<b>Cuota mensual:</b> '+(q&&q.venc?fdate(q.venc)+(q.cob&&q.cob.estado&&!q.atrasada?' · '+esc(q.cob.estado):'')+(q.src?' <span class="muted" style="font-size:12px">('+esc(q.src)+')</span>':''):'—');
+    const vig='<b>Fin de vigencia:</b> '+fdate(p.vigHasta)+(dv!=null?' <span class="chip '+(dv<0?"bad":dv<=30?"warn":"")+'">'+(dv<0?"vencida":dv===0?"hoy":"en "+dv+" d")+'</span>':'');
+    const msg="Hola "+first(c.pila||c.nombre)+"! Te escribo de LP Seguros para recordarte que "+(q&&q.venc?(q.atrasada?"figura impaga la cuota de tu seguro que venció el "+fdate(q.venc):"el "+fdate(q.venc)+" vence la cuota de tu seguro"):"vence la cuota de tu seguro")+(p.ramo&&p.ramo!=="Otro"?" de "+p.ramo.toLowerCase():"")+(p.bien?" ("+p.bien+")":"")+(p.compania?" en "+p.compania:"")+". Si necesitás el cupón te lo paso por acá.";
+    return li(esc(c.nombre||"Sin cliente")+' '+chipQ,cuota+'<br>'+vig+'<br>'+esc([p.ramo,p.compania,p.bien,p.numero?"Pól. "+p.numero:""].filter(Boolean).join(" · ")),
+      (waNum(c.telefono)?waBtn(c.telefono,msg):'<span class="chip warn">sin teléfono</span>')+btn("Editar","edit","polizas",p.id)+btn("Quitar","nomanual","polizas",p.id))}).join("")+'</ul></section>';
+  const C=S.polizas.filter(p=>!esManual(p)&&!p.formaPago&&vigente(p)&&match(p)).sort((a,b)=>cliName(a.clienteId).localeCompare(cliName(b.clienteId)));
+  if(C.length)h+='<section class="panel" style="margin-top:14px"><header><h2>Pólizas sin forma de pago cargada</h2><span class="count">'+C.length+'</span><span class="muted" style="font-size:12px">tocá “Paga con cupón” en las que corresponda</span></header><ul class="rows">'+C.slice(0,q?200:60).map(p=>li(esc(cliName(p.clienteId)),esc([p.ramo,p.compania,p.bien,p.numero?"Pól. "+p.numero:""].filter(Boolean).join(" · "))+" · fin de vigencia "+fdate(p.vigHasta),btn("Paga con cupón","manual","polizas",p.id)+btn("Es débito","debito","polizas",p.id))).join("")+'</ul>'+(C.length>(q?200:60)?'<div class="empty">y '+(C.length-(q?200:60))+' más: usá el buscador para encontrarlas</div>':'')+'</section>';
+  return h}
+
 // ---------- actions
 document.addEventListener("click",async e=>{
   const t=e.target.closest("[data-act]");if(!t)return;const {act,col,id,x}=t.dataset;
@@ -932,6 +967,9 @@ document.addEventListener("click",async e=>{
     toast(n+" clientes actualizados");$("#impDlg").close()}
   else if(act==="gencuotas"){const mk=x;const L=cuotasFaltantes(mk);if(!L.length){toast("No hay cuotas para generar");return}t.disabled=true;t.textContent="Generando…";
     try{const now=new Date().toISOString();for(const it of L)await db.collection("cobranzas").doc("auto-"+it.p.id+"-"+mk).set({polizaId:it.p.id,periodo:mk.slice(5)+"/"+mk.slice(0,4),vencimiento:it.venc,estado:"A cobrar",auto:true,createdAt:now,updatedAt:now});toast(L.length+" cuotas generadas")}catch(er){err(er)}}
+  else if(act==="manual"){await patch("polizas",id,{formaPago:"Pago manual",updatedAt:new Date().toISOString()});toast("Marcada como pago manual")}
+  else if(act==="nomanual"){await patch("polizas",id,{formaPago:"",updatedAt:new Date().toISOString()});toast("Sacada de pago manual")}
+  else if(act==="debito"){await patch("polizas",id,{formaPago:"Débito",updatedAt:new Date().toISOString()});toast("Marcada como débito")}
   else if(act==="sent"){await patch("polizas",id,{enviada:true});toast("Marcada como enviada")}
   else if(act==="touched"){await patch("clientes",id,{ultimoContacto:todayISO()});toast("Contacto registrado")}
   else if(act==="mkopp"){const c=byId("clientes",id)||{};openForm("oportunidades",null,Object.assign(defaults("oportunidades"),{clienteId:id,telefono:c.telefono||"",ramos:[x],etapa:"Contactado",proximoPaso:"Ofrecer "+x}))}
