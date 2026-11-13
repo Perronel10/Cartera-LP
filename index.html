@@ -104,6 +104,7 @@ details.comp .dd label:hover{background:var(--surface-2)}
 details.comp .dd input{width:auto}
 details.comp .dd .n{margin-left:auto;color:var(--ink-3);font-size:12px;font-family:var(--f-mono)}
 details.comp .dd .top{display:flex;gap:6px;justify-content:space-between;align-items:center;padding:0 2px 8px;border-bottom:1px solid var(--line);margin-bottom:6px;font-size:12.5px;color:var(--ink-3)}
+@media (max-width:640px){.toolbar{position:relative}details.comp{position:static}details.comp .dd{left:0;right:0;min-width:0}}
 .tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
 table{border-collapse:collapse;width:100%;min-width:760px}
 th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -333,7 +334,7 @@ const SCHEMA={
 };
 const COLS=Object.keys(SCHEMA);
 const S={clientes:[],polizas:[],cobranzas:[],oportunidades:[],siniestros:[],recordatorios:[],config:[]};let assets=null;
-const loaded={};let db=null;let view="panel";const filt={q:"",f:"",comp:[],compOpen:false};
+const loaded={};let db=null;let view="panel";const filt={q:"",f:"",comp:[],fp:[],open:null};
 
 // ---------- helpers
 const $=s=>document.querySelector(s);
@@ -405,7 +406,7 @@ async function save(col,id,data){
 async function patch(col,id,data){try{await db.collection(col).doc(id).update(data);}catch(e){err(e)}}
 
 // ---------- routing
-function route(){const h=location.hash.slice(1);view=SCHEMA[h]||["panel","aumentos","recordatorios","alertas","renovaciones","tablero","comisiones","manual"].includes(h)||h.startsWith("cuenta-")||h.startsWith("kit-")?h:"panel";filt.q="";filt.f="";filt.compOpen=false;render()}
+function route(){const h=location.hash.slice(1);view=SCHEMA[h]||["panel","aumentos","recordatorios","alertas","renovaciones","tablero","comisiones","manual"].includes(h)||h.startsWith("cuenta-")||h.startsWith("kit-")?h:"panel";filt.q="";filt.f="";filt.open=null;render()}
 window.addEventListener("hashchange",route);
 
 function render(){
@@ -416,7 +417,7 @@ function render(){
   const v=$("#view");const ae=document.activeElement,keepFocus=ae&&ae.id==="q",keepMsg=ae&&ae.id==="msgTxt"?[ae.selectionStart,ae.selectionEnd]:null;
   v.innerHTML=view==="panel"?panel():view==="aumentos"?aumentos():view==="recordatorios"?recordatorios():view==="alertas"?alertasView():view.startsWith("cuenta-")?cuenta(view.slice(7)):view==="renovaciones"?renovaciones():view==="manual"?pagoManual():view==="tablero"?tablero():view==="comisiones"?comisiones():view.startsWith("kit-")?kit(view.slice(4)):list(view);
   if(keepMsg){const m=$("#msgTxt");if(m){m.focus();m.setSelectionRange(keepMsg[0],keepMsg[1])}}
-  if(ae&&ae.dataset&&ae.dataset.comp!=null){const cb=[...document.querySelectorAll("#compDd input[data-comp]")].find(i=>i.dataset.comp===ae.dataset.comp);if(cb)cb.focus()}
+  if(ae&&ae.dataset&&ae.dataset.mf){const cb=[...document.querySelectorAll("input[data-mf]")].find(i=>i.dataset.mf===ae.dataset.mf&&i.dataset.v===ae.dataset.v);if(cb)cb.focus()}
   if(keepFocus){const q=$("#q");if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}}
 }
 
@@ -576,21 +577,26 @@ const LIST={
   row:o=>{const e=o.etapa||"Contactado";const d=days(o.fechaProximo);return [esc(o.prospecto||cliName(o.clienteId)),esc((o.ramos||[]).join(", ")||"—"),'<span class="chip '+(e==="Emitida"?"ok":e==="Perdida"?"bad":"acc")+'">'+esc(e)+'</span>',esc(o.proximoPaso||"—"),fdate(o.fechaProximo)+(d!=null&&d<=0&&!["Emitida","Perdida"].includes(e)?' <span class="chip warn">hoy</span>':''),{n:money(o.prima)},esc(o.responsable||"—")]}}
 };
 function searchText(col,x){if(col==="siniestros")return Object.values(x).filter(v=>typeof v==="string").join(" ")+" "+cliName(x.clienteId);const base=Object.values(x).filter(v=>typeof v==="string"||typeof v==="number").join(" ");if(col==="polizas"||col==="oportunidades")return base+" "+cliName(x.clienteId);if(col==="cobranzas"){const p=byId("polizas",x.polizaId)||{};return base+" "+cliName(p.clienteId)+" "+(p.ramo||"")}return base}
-// ---------- filtro por compañía (selección múltiple, se mantiene al cambiar de pestaña)
-function compKey(p){return ((p&&p.compania)||"").trim()||"Sin compañía"}
-function compOk(p){return !filt.comp.length||filt.comp.includes(compKey(p))}
-function compOkCol(col,x){if(!filt.comp.length)return true;
+// ---------- filtros de selección múltiple: compañía y forma de pago (se mantienen al cambiar de pestaña)
+const MF={
+ comp:{key:p=>((p&&p.compania)||"").trim()||"Sin compañía",sin:"Sin compañía",todas:"Compañía: todas",uno:"Compañía: ",varios:"Compañías: ",tit:"Buscar por compañía",ver:"ver todas las compañías"},
+ fp:{key:p=>((p&&p.formaPago)||"").trim()||"Sin dato",sin:"Sin dato",todas:"Forma de pago: todas",uno:"Pago: ",varios:"Formas de pago: ",tit:"Buscar por forma de pago",ver:"ver todas las formas de pago"}};
+function compOk(p){return Object.keys(MF).every(d=>!filt[d].length||filt[d].includes(MF[d].key(p)))}
+function anyMF(){return Object.keys(MF).some(d=>filt[d].length)}
+function compOkCol(col,x){if(!anyMF())return true;
   if(col==="polizas")return compOk(x);
   if(col==="cobranzas"||col==="siniestros")return compOk(byId("polizas",x.polizaId));
   if(col==="clientes")return S.polizas.some(p=>p.clienteId===x.id&&compOk(p));
   return true}
-function compPicker(){const n={};S.polizas.forEach(p=>{const k=compKey(p);n[k]=(n[k]||0)+1});
-  const L=Object.keys(n).sort((a,b)=>a==="Sin compañía"?1:b==="Sin compañía"?-1:a.localeCompare(b));
-  filt.comp.forEach(c=>{if(!L.includes(c))L.push(c)});const sel=filt.comp;
-  const lbl=!sel.length?"Compañía: todas":sel.length===1?"Compañía: "+sel[0]:"Compañías: "+sel.length;
-  return '<details class="comp'+(sel.length?" on":"")+'" id="compDd"'+(filt.compOpen?" open":"")+'><summary class="btn" title="Buscar por compañía">'+esc(lbl)+' ▾</summary><div class="dd"><div class="top"><span>Elegí una o varias</span>'+(sel.length?'<button type="button" class="sm" data-act="compall">Ver todas</button>':'')+'</div>'+
-    L.map(c=>'<label><input type="checkbox" data-comp="'+esc(c)+'"'+(sel.includes(c)?" checked":"")+'> '+esc(c)+'<span class="n">'+(n[c]||0)+'</span></label>').join("")+'</div></details>'}
-function compNote(){return filt.comp.length?'<div class="muted" style="font-size:13px">Mostrando solo: <b>'+filt.comp.map(esc).join(", ")+'</b> · <a href="#" data-act="compall">ver todas las compañías</a></div>':''}
+function mfPicker(d){const M=MF[d],n={};S.polizas.forEach(p=>{const k=M.key(p);n[k]=(n[k]||0)+1});
+  const L=Object.keys(n).sort((a,b)=>a===M.sin?1:b===M.sin?-1:a.localeCompare(b));
+  filt[d].forEach(c=>{if(!L.includes(c))L.push(c)});const sel=filt[d];
+  const lbl=!sel.length?M.todas:sel.length===1?M.uno+sel[0]:M.varios+sel.length;
+  return '<details class="comp'+(sel.length?" on":"")+'" id="dd_'+d+'"'+(filt.open===d?" open":"")+'><summary class="btn" title="'+M.tit+'">'+esc(lbl)+' ▾</summary><div class="dd"><div class="top"><span>Elegí una o varias</span>'+(sel.length?'<button type="button" class="sm" data-act="mfall" data-x="'+d+'">Ver todas</button>':'')+'</div>'+
+    L.map(c=>'<label><input type="checkbox" data-mf="'+d+'" data-v="'+esc(c)+'"'+(sel.includes(c)?" checked":"")+'> '+esc(c)+'<span class="n">'+(n[c]||0)+'</span></label>').join("")+'</div></details>'}
+function compPicker(){return mfPicker("comp")+mfPicker("fp")}
+function compNote(){const ps=Object.keys(MF).filter(d=>filt[d].length);if(!ps.length)return '';
+  return '<div class="muted" style="font-size:13px">Mostrando solo: '+ps.map(d=>'<b>'+filt[d].map(esc).join(", ")+'</b> · <a href="#" data-act="mfall" data-x="'+d+'">'+MF[d].ver+'</a>').join(" &nbsp;|&nbsp; ")+'</div>'}
 function list(col){
   const L=LIST[col];const f=filt.f||L.filter[0];const q=filt.q.trim().toLowerCase();
   const rows=S[col].filter(x=>L.test(x,f)).filter(x=>compOkCol(col,x)).filter(x=>!q||searchText(col,x).toLowerCase().includes(q)).sort(L.sort);
@@ -819,7 +825,7 @@ function renovaciones(){
     return h+'<section class="panel"><ul class="rows">'+cs.map(p=>li(esc(cliName(p.clienteId))+' <span class="chip '+(p.renovacion==="Renovada"?"ok":"bad")+'">'+esc(p.renovacion)+'</span>',esc([p.ramo,p.compania,p.bien].filter(Boolean).join(" · ")),btn("Abrir","edit","polizas",p.id))).join("")+'</ul></section>'}
   const R=renovPend().filter(compOk);
   h+='<div class="muted" style="font-size:13.5px;max-width:80ch">Pólizas que vencen en los próximos 30 días o ya vencieron sin cerrar. Movelas con un toque: <b>Cotizada</b> → <b>Enviada</b> → <b>Renovada</b> (o <b>Perdida</b>). Al marcarla renovada se abre para que cargues la nueva vigencia.</div>';
-  if(!R.length)return h+'<div class="panel"><div class="empty">No hay renovaciones pendientes en los próximos 30 días'+(filt.comp.length?' para esas compañías':'')+'.</div></div>';
+  if(!R.length)return h+'<div class="panel"><div class="empty">No hay renovaciones pendientes en los próximos 30 días'+(anyMF()?' con esos filtros':'')+'.</div></div>';
   const grupos=[["Vencidas sin renovar",p=>days(p.vigHasta)<0,"bad"],["Vencen en 10 días",p=>days(p.vigHasta)>=0&&days(p.vigHasta)<=10,"warn"],["Vencen en 11 a 30 días",p=>days(p.vigHasta)>10,""]];
   grupos.forEach(([t,fn,cl])=>{const g=R.filter(fn);if(!g.length)return;
     h+='<section class="panel" style="margin-top:14px"><header><h2>'+t+'</h2><span class="count">'+g.length+'</span></header><ul class="rows">'+g.map(p=>{const c=byId("clientes",p.clienteId)||{};const d=days(p.vigHasta);const st=p.renovacion||"Pendiente";
@@ -951,7 +957,7 @@ function pagoManual(){
   h+='<div class="muted" style="font-size:13.5px;max-width:80ch">Solo los asegurados que pagan con <b>cupón</b> (forma de pago “Pago manual”), ordenados por la cuota que vence primero. Para cada uno ves primero el <b>vencimiento de la cuota mensual</b> y después el <b>fin de vigencia</b> de la póliza.</div>';
   const M=S.polizas.filter(p=>esManual(p)&&(f==="Todas"||vigente(p))&&match(p)).map(p=>({p,c:byId("clientes",p.clienteId)||{},q:proxCuota(p)}));
   const key=x=>x.q&&x.q.venc?x.q.venc:"9999";M.sort((a,b)=>key(a).localeCompare(key(b))||cliName(a.p.clienteId).localeCompare(cliName(b.p.clienteId)));
-  if(!M.length)h+='<section class="panel" style="margin-top:14px"><div class="empty">'+(q||filt.comp.length?'No hay pólizas de pago manual que coincidan con la búsqueda.':'Todavía no hay pólizas marcadas como pago manual. Marcalas en la lista de abajo o desde Editar → Forma de pago.')+'</div></section>';
+  if(!M.length)h+='<section class="panel" style="margin-top:14px"><div class="empty">'+(q||anyMF()?'No hay pólizas de pago manual que coincidan con la búsqueda.':'Todavía no hay pólizas marcadas como pago manual. Marcalas en la lista de abajo o desde Editar → Forma de pago.')+'</div></section>';
   else h+='<section class="panel" style="margin-top:14px"><header><h2>Pagan con cupón</h2><span class="count">'+M.length+'</span></header><ul class="rows">'+M.map(({p,c,q})=>{
     const dq=q&&q.venc?days(q.venc):null,dv=p.vigHasta?days(p.vigHasta):null;
     const chipQ=!q?'<span class="chip">sin día de cuota</span>':!q.venc?'<span class="chip">sin más cuotas</span>':q.atrasada?'<span class="chip bad">cuota atrasada '+(-dq)+' d</span>':'<span class="chip '+(dq<=3?"warn":"acc")+'">cuota '+(dq===0?"hoy":"en "+dq+" d")+'</span>';
@@ -976,7 +982,7 @@ document.addEventListener("click",async e=>{
     if(+k.importe>0)toast("Cuota marcada como pagada");else{setTimeout(()=>{openForm("cobranzas",id);const f=$("#f_importe");if(f){const u=ultImporte(k.polizaId);if(u&&!f.value)f.placeholder="último: "+u;f.focus()}},120);toast("Pagada. Cargá el importe que pagó")}}
   else if(act==="avisado"){await patch("cobranzas",id,{estado:"Avisado",fechaAviso:todayISO()});toast("Marcada como avisada")}
   else if(act==="noop"){}
-  else if(act==="compall"){e.preventDefault();filt.comp=[];render()}
+  else if(act==="mfall"){e.preventDefault();filt[x]=[];render()}
   else if(act==="ren"){const pp=byId("polizas",id)||{};const d={renovacion:x};const tt=todayISO();if(x==="Renovada")d.fechaRenov=tt;if(x==="Perdida")d.fechaBaja=tt;await patch("polizas",id,d);
     if(x==="Renovada"){toast("Renovada: cargá la nueva vigencia");setTimeout(()=>openForm("polizas",id),150)}else toast("Marcada: "+(x==="Enviada al cliente"?"enviada":x.toLowerCase()))}
   else if(act==="compol"){const v=$("#comPol").value,pc=$("#comPolPct").value;const pp=S.polizas.find(p=>v===cliName(p.clienteId)+" · "+(p.compania||"")+" · "+(p.numero||p.id));if(!pp||pc===""){toast("Elegí una póliza de la lista y el %");return}
@@ -1008,9 +1014,9 @@ document.addEventListener("click",async e=>{
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("tr[data-act]"))e.target.click()});
 document.addEventListener("input",e=>{if(e.target.id==="q"){filt.q=e.target.value;render()}});
 document.addEventListener("change",e=>{if(e.target.id==="f"){filt.f=e.target.value;render()}
-  else if(e.target.dataset.comp!=null){const c=e.target.dataset.comp;filt.comp=e.target.checked?[...new Set([...filt.comp,c])]:filt.comp.filter(x=>x!==c);filt.compOpen=true;render()}});
-document.addEventListener("toggle",e=>{if(e.target.id==="compDd")filt.compOpen=e.target.open},true);
-document.addEventListener("click",e=>{const d=$("#compDd");if(d&&d.open&&!d.contains(e.target)){d.open=false;filt.compOpen=false}});
+  else if(e.target.dataset.mf){const d=e.target.dataset.mf,c=e.target.dataset.v;filt[d]=e.target.checked?[...new Set([...filt[d],c])]:filt[d].filter(x=>x!==c);filt.open=d;render()}});
+document.addEventListener("toggle",e=>{const id=e.target.id||"";if(id.startsWith("dd_")){if(e.target.open)filt.open=id.slice(3);else if(filt.open===id.slice(3))filt.open=null}},true);
+document.addEventListener("click",e=>{document.querySelectorAll("details.comp[open]").forEach(d=>{if(!d.contains(e.target))d.open=false})});
 document.addEventListener("change",async e=>{const t=e.target;
   if(t.dataset.compct!=null){const pc=Object.assign({},(COM||{}).porCompania||{});if(t.value==="")delete pc[t.dataset.compct];else pc[t.dataset.compct]=+t.value;await comSave({porCompania:pc});toast("Guardado")}
   else if(t.dataset.cfgyo){const k=t.dataset.cfgyo,v=t.value.trim();await cfgSave(c=>{c.yo=Object.assign({},c.yo||{},{[k]:v})});toast("Guardado")}
